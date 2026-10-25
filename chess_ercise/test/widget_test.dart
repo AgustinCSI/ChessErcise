@@ -59,7 +59,7 @@ void main() {
       final auth = AuthProvider(auth: client);
       expect(await auth.registrar('a@b.cl', '123456'), isNull);
       expect(auth.requiereConfirmacion, isTrue);
-    expect(client.redirect, 'chessercise://login-callback/');
+      expect(client.redirect, 'chessercise://login-callback/');
       client.falla = true;
       expect(
         await auth.ingresar(' a@b.cl ', '123456'),
