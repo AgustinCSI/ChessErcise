@@ -46,3 +46,8 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Configuración local de Supabase
+supabase.local.json
+# Mantener versiones reproducibles para esta aplicación Flutter
+!pubspec.lock
