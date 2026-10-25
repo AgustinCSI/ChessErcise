@@ -10,6 +10,8 @@ class PuzzleController extends ChangeNotifier {
   PuzzleController(this.puzzle) {
     posicion = puzzle.posicionInicial;
     ultimaJugada = puzzle.ultimaJugada;
+    _posiciones.add(posicion);
+    _jugadas.add(ultimaJugada);
   }
 
   final PuzzleDiario puzzle;
@@ -20,10 +22,64 @@ class PuzzleController extends ChangeNotifier {
   bool esperando = false;
   String mensaje = 'Encuentra la mejor jugada.';
   Timer? _respuesta;
+  final List<Position> _posiciones = [];
+  final List<Move?> _jugadas = [];
+  int vista = 0;
+  bool rendido = false;
+  Square? pista;
+
+  Position get posicionVisible => _posiciones[vista];
+  Move? get jugadaVisible => _jugadas[vista];
+  int get totalJugadas => _posiciones.length - 1;
+  bool get revisando => vista != totalJugadas;
+  bool get puedeRetroceder => vista > 0;
+  bool get puedeAvanzar => vista < totalJugadas;
+  String get mensajeVisible => rendido
+      ? 'Te rendiste. Usa las flechas para ver la solución.'
+      : revisando
+      ? 'Revisando jugadas. Avanza hasta el final para continuar.'
+      : mensaje;
+
+  void anterior() {
+    if (!puedeRetroceder) return;
+    vista--;
+    pista = null;
+    notifyListeners();
+  }
+
+  void siguiente() {
+    if (!puedeAvanzar) return;
+    vista++;
+    pista = null;
+    notifyListeners();
+  }
+
+  void mostrarPista() {
+    if (!puedeMover) return;
+    final move = puzzle.solucion[indice];
+    if (move is NormalMove) pista = move.from;
+    notifyListeners();
+  }
+
+  // Revelar no aplica movimientos a la partida real ni cuenta como resolverla.
+  void rendirse() {
+    if (rendido || completado) return;
+    _respuesta?.cancel();
+    esperando = false;
+    rendido = true;
+    pista = null;
+    var siguientePosicion = posicion;
+    for (final move in puzzle.solucion.skip(indice)) {
+      siguientePosicion = siguientePosicion.play(move);
+      _posiciones.add(siguientePosicion);
+      _jugadas.add(move);
+    }
+    notifyListeners();
+  }
 
   Side get jugador => puzzle.posicionInicial.turn;
-  bool get completado => indice == puzzle.solucion.length;
-  bool get puedeMover => !esperando && !completado;
+  bool get completado => !rendido && indice == puzzle.solucion.length;
+  bool get puedeMover => !esperando && !completado && !rendido && !revisando;
   double get progreso => indice / puzzle.solucion.length;
 
   Move _normalizar(Move move) =>
@@ -31,6 +87,7 @@ class PuzzleController extends ChangeNotifier {
 
   void jugar(Move move) {
     if (!puedeMover || !posicion.isLegal(move)) return;
+    pista = null;
     if (_normalizar(move) != _normalizar(puzzle.solucion[indice])) {
       errores++;
       mensaje =
@@ -55,9 +112,13 @@ class PuzzleController extends ChangeNotifier {
   }
 
   void _aplicar(Move move) {
+    final siguiendo = !revisando;
     posicion = posicion.play(move);
     ultimaJugada = move;
     indice++;
+    _posiciones.add(posicion);
+    _jugadas.add(move);
+    if (siguiendo) vista = totalJugadas;
   }
 
   void reiniciar() {
@@ -68,6 +129,15 @@ class PuzzleController extends ChangeNotifier {
     errores = 0;
     esperando = false;
     mensaje = 'Encuentra la mejor jugada.';
+    rendido = false;
+    pista = null;
+    vista = 0;
+    _posiciones
+      ..clear()
+      ..add(posicion);
+    _jugadas
+      ..clear()
+      ..add(ultimaJugada);
     notifyListeners();
   }
 

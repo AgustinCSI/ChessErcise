@@ -19,7 +19,7 @@ class _TableroWidgetState extends State<TableroWidget> {
 
   GameData _datos() {
     final puzzle = widget.puzzle;
-    final posicion = puzzle.posicion;
+    final posicion = puzzle.posicionVisible;
     return GameData(
       fen: posicion.fen,
       playerSide: !puzzle.puedeMover
@@ -29,7 +29,7 @@ class _TableroWidgetState extends State<TableroWidget> {
           : PlayerSide.black,
       sideToMove: posicion.turn,
       validMoves: makeLegalMoves(posicion),
-      lastMove: puzzle.ultimaJugada,
+      lastMove: puzzle.jugadaVisible,
       kingSquareInCheck: posicion.isCheck
           ? posicion.board.kingOf(posicion.turn)
           : null,
@@ -67,6 +67,10 @@ class _TableroWidgetState extends State<TableroWidget> {
     size: widget.size,
     controller: _tablero,
     orientation: widget.puzzle.jugador,
+    shapes: {
+      if (widget.puzzle.pista case final square?)
+        Circle(color: Theme.of(context).colorScheme.primary, orig: square),
+    },
     onMove: (move, {viaDragAndDrop}) => widget.puzzle.jugar(move),
   );
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../logic/puzzle_controller.dart';
 import '../../../models/puzzle_diario.dart';
 import '../../widgets/tablero_widget.dart';
+import '../../widgets/puzzle_toolbar.dart';
 
 class PuzzleScreen extends StatefulWidget {
   const PuzzleScreen({super.key, required this.puzzle});
@@ -26,6 +27,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('Puzzle diario')),
+    bottomNavigationBar: PuzzleToolbar(controller: _controller),
     body: SafeArea(
       child: ListenableBuilder(
         listenable: _controller,
@@ -76,11 +78,13 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                     ),
                     child: Semantics(
                       liveRegion: true,
-                      child: Text(_controller.mensaje),
+                      child: Text(_controller.mensajeVisible),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text('Errores: ${_controller.errores}'),
+                  Text(
+                    'Jugada ${_controller.vista}/${_controller.totalJugadas} · Errores: ${_controller.errores}',
+                  ),
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
                     onPressed: _controller.reiniciar,

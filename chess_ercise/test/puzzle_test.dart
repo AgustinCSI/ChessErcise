@@ -79,6 +79,97 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('History is read-only and retains last-move highlights', (
+    tester,
+  ) async {
+    final controller = PuzzleController(PuzzleDiario.fromJson(fixture()));
+    final start = controller.posicion.fen;
+    controller.mostrarPista();
+    expect(
+      controller.pista,
+      (controller.puzzle.solucion.first as NormalMove).from,
+    );
+    controller.jugar(controller.puzzle.solucion.first);
+    expect(controller.pista, isNull);
+    controller.anterior();
+    expect(controller.posicionVisible.fen, start);
+    expect(controller.jugadaVisible, controller.puzzle.ultimaJugada);
+    expect(controller.puedeMover, isFalse);
+    // A reply arriving while reviewing must not move the viewing cursor.
+    await tester.pump(const Duration(milliseconds: 650));
+    final live = controller.posicion.fen;
+    expect(controller.vista, 0);
+    expect(controller.indice, 2);
+    controller.jugar(controller.puzzle.solucion.last);
+    controller.mostrarPista();
+    expect(controller.indice, 2);
+    expect(controller.pista, isNull);
+    controller.siguiente();
+    expect(controller.jugadaVisible, controller.puzzle.solucion.first);
+    expect(controller.puedeMover, isFalse);
+    controller.siguiente();
+    expect(controller.posicionVisible.fen, live);
+    expect(controller.jugadaVisible, controller.puzzle.solucion[1]);
+    expect(controller.puedeMover, isTrue);
+    controller.jugar(controller.puzzle.solucion.last);
+    expect(controller.completado, isTrue);
+    controller.dispose();
+  });
+
+  testWidgets('Surrender cancels reply and reveals solution without success', (
+    tester,
+  ) async {
+    final controller = PuzzleController(PuzzleDiario.fromJson(fixture()));
+    controller.jugar(controller.puzzle.solucion.first);
+    final live = controller.posicion.fen;
+    controller.rendirse();
+    controller.rendirse();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.indice, 1);
+    expect(controller.posicion.fen, live);
+    expect(controller.rendido, isTrue);
+    expect(controller.completado, isFalse);
+    expect(controller.totalJugadas, 3);
+    controller.siguiente();
+    controller.siguiente();
+    expect(controller.posicionVisible.isCheckmate, isTrue);
+    expect(controller.puedeMover, isFalse);
+    controller.reiniciar();
+    expect(controller.rendido, isFalse);
+    expect(controller.totalJugadas, 0);
+    expect(controller.puedeMover, isTrue);
+    controller.dispose();
+  });
+
+  testWidgets('Toolbar confirms surrender and keeps icon-only controls', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.claro,
+        home: PuzzleScreen(puzzle: PuzzleDiario.fromJson(fixture())),
+      ),
+    );
+    expect(find.byTooltip('Jugada anterior'), findsOneWidget);
+    expect(find.byTooltip('Jugada siguiente'), findsOneWidget);
+    await tester.tap(find.byTooltip('Pista: pieza que debes mover'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Rendirse y ver solución'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancelar'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Te rendiste.'), findsNothing);
+    await tester.tap(find.byTooltip('Rendirse y ver solución'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ver solución'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Te rendiste.'), findsOneWidget);
+    await tester.tap(find.byTooltip('Jugada siguiente'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   test('Promotion and alternate castling notation are supported', () {
     final promotion = PuzzleDiario.fromJson({
       'puzzle': {
