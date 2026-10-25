@@ -2,6 +2,8 @@
 
 Revisión: 24 de octubre de 2026. Sustituye las suposiciones del 23 de octubre sobre un solo dispositivo, ranking como función principal de API y puzzle como extra. Estado: alcance aclarado por el equipo; prioridad de entrega de online pendiente de confirmar.
 
+Actualización de avance del 25-10-2026: el compañero aportó la base en `chess_ercise/`, que solo contiene el contador Flutter y su prueba. Los requisitos siguientes no cambian; su estado verificado está en [07_revision_avance_2026_10_25.md](07_revision_avance_2026_10_25.md). No confundir creación de la estructura con implementación de los modos de juego.
+
 ## 1. Fuentes y autoridad de cada requisito
 
 | Fuente | Información verificada |

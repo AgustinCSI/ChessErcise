@@ -2,6 +2,8 @@
 
 Fecha: 24 de octubre de 2026. **Recomendación: preparar el proyecto y su acceso ahora; integrar Auth temprano y crear tablas por bloque.** No posponer toda la conexión hasta el final.
 
+Actualización documental del 25-10: ahora hay base Flutter en `chess_ercise/`, todavía sin supabase_flutter o autenticación. El estado externo del panel que se describe abajo corresponde a la inspección del día 24 y no se volvió a verificar en la revisión de Git del día 25; no supone que el usuario no haya creado el proyecto después.
+
 ## 1. Preparar ahora no significa implementar todo ahora
 
 | Momento | Trabajo | Razón |
@@ -78,7 +80,7 @@ Usar un mecanismo simple y explicado, siguiendo clase 7; parámetros de compilac
 | Formulario correcto con nombre ChessErcise | Preparado; no enviado por el agente |
 | Proyecto PostgreSQL creado y disponible | No verificado; requiere completar creación |
 | Conector Supabase conectado | No verificado; opcional si se usa navegador |
-| SDK Flutter inicializado | No ejecutado; no existe app todavía |
+| SDK Supabase inicializado en Flutter | No ejecutado; la base recibida en chess_ercise aún no declara supabase_flutter |
 | Registro/ingreso/salida reales | No ejecutados |
 | Tablas, RLS y CRUD | No creados ni ejecutados |
 | Vinculación GitHub | No realizada; innecesaria para comenzar |

@@ -1,6 +1,6 @@
 # 03 · Arquitectura Flutter propuesta
 
-Revisión: 24 de octubre de 2026. Se conserva la arquitectura general aceptada por el equipo y se adapta a **Android, LAN host/cliente, puzzle y online Lichess**. No hay implementación Flutter todavía.
+Revisión: 25 de octubre de 2026. Se conserva la arquitectura general aceptada para **Android, LAN host/cliente, puzzle y online Lichess**. Ahora existe una base Flutter de contador en `chess_ercise/`, aportada por el compañero; todavía no implementa funciones del producto. Ver [revisión del avance](07_revision_avance_2026_10_25.md).
 
 ## 1. Forma de programar
 
@@ -11,8 +11,8 @@ Se mantiene la combinación de capas sencillas y pantallas por funcionalidad: `m
 ## 2. Árbol propuesto, creado gradualmente
 
 ```text
-ChessErcise/
-├── android/                         # Única plataforma de producto
+chess_ercise/                        # Subcarpeta Flutter dentro de ChessErcise/
+├── android/                         # Único objetivo de producto
 ├── lib/
 │   ├── main.dart
 │   ├── app.dart
@@ -53,19 +53,13 @@ ChessErcise/
 │           └── tablero_widget.dart   # Adaptación del widget chessground
 ├── assets/                           # Solo recursos utilizados y declarados
 ├── test/                             # Modelos, servicios, reglas e interacción
-├── supabase/ejercicios.sql
 ├── pubspec.yaml
-├── pubspec.lock
-├── docs/
-│   ├── 00_auditoria_inicial.md ... 06_preparacion_supabase.md
-│   ├── plantilla-propuesta-flutter.docx
-│   ├── ChessErciseMockupsUso.pdf
-│   ├── bitacora.md
-│   └── bloques/                     # Interno; ignorado por Git
-└── image/README/                     # Originales conservados
+└── pubspec.lock
 ```
 
-No se crean iOS, web o una segunda aplicación servidor. El host se ejecuta dentro del Android que aloja la partida. Se retiran JugadorRanking/JugadoresProvider del diseño anterior porque el puzzle es la función API declarada.
+Este árbol describe la aplicación **dentro de chess_ercise/**; no implica que los archivos propuestos ya existan. `docs/`, `image/README/` y el futuro `supabase/ejercicios.sql` permanecen en la raíz Git, fuera de esa carpeta. Los comandos Flutter se ejecutan en chess_ercise, no en la raíz Git.
+
+El scaffold recibido ya contiene ios, web, linux, macos y windows; se conservan sin desarrollarlos ni eliminarlos durante esta revisión. Android sigue siendo el único objetivo. No se crea otra app en raíz ni una aplicación servidor separada: el host se ejecutará en el Android que aloja la partida. Se retiran JugadorRanking/JugadoresProvider del diseño anterior porque el puzzle es la función API declarada.
 
 ## 3. Responsabilidades y relación con las clases
 
@@ -97,7 +91,7 @@ Los nombres de métodos concretos se fijan al implementar y se explican antes de
 | dio | HTTP y consumo API como en clase | Reutilizar; no sumar cliente HTTP redundante |
 | supabase_flutter | Auth y CRUD privado como en clase | Preparar proyecto ahora; integrar en B04–B06 |
 
-Los metadatos locales del día 23 indican Flutter 3.44.8 y Dart 3.12.2. Los rangos publicados no muestran un conflicto directo de SDK, pero **aún no se resolvieron juntos ni se compiló**. Revisar también dependencias transitivas fijadas por Flutter, como meta, antes de escoger versiones. B03 prueba el conjunto y conserva pubspec.lock; no instalar todo por ser «lo último» ni actualizar el SDK a ciegas.
+El día 25 se confirmó directamente Dart 3.12.2 y los metadatos locales siguen indicando Flutter 3.44.8. **La base recibida exige Dart ^3.13.5: primero hay que alinear el SDK en B02.** Los rangos de paquetes de la tabla solo reflejan la consulta anterior; no prueban compatibilidad con la aplicación generada. Aún no se resolvieron juntos ni se compiló. Revisar también dependencias transitivas fijadas por Flutter, como meta. B03 prueba el conjunto después de cerrar B02 y conserva pubspec.lock; no instalar todo ni actualizar SDK a ciegas.
 
 Chessground ofrece un controlador que se inicializa y libera en el State. Sus callbacks comunican intenciones de movimiento; la posición confirmada viene del motor/servidor correspondiente. Usar el widget ya propuesto ahorra construir un pintor de tablero propio y mantiene el resto de pantallas con widgets del curso. [Documentación del paquete](https://pub.dev/packages/chessground).
 
@@ -167,6 +161,6 @@ Usar MultiProvider solo para dependencias que comparten ese ámbito. El tablero 
 
 ## 10. Documentación interna y comparación con el estado actual
 
-El repositorio sigue sin código Flutter. Esta intervención solo cambia documentación y la regla solicitada del ignore. Se conservan README, LICENSE, imágenes y documentos aportados.
+El repositorio contiene la base Flutter generada en `chess_ercise/`; el código de producto y las capas de este diseño aún no existen. La revisión del día 25 solo actualiza documentación de avance, sin modificar el trabajo del compañero, dependencias o configuración Android. Se conservan README, LICENSE, imágenes y documentos aportados. La siguiente tarea propuesta es validar/completar B02, sin repetir flutter create.
 
 Cada parte implementada tendrá un reporte privado en `docs/bloques/`, con funciones y fragmentos explicados, comandos, pruebas y propuesta de commit. Los documentos 00–06 y bitácora son públicos/versionables; no deben depender de enlaces a reportes que no se subirán. El README futuro incluirá instrucciones reproducibles para que el proyecto se entienda también sin la carpeta interna.

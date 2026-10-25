@@ -1,6 +1,8 @@
 # 04 · Plan de trabajo por partes revisables
 
-Revisión: 24 de octubre de 2026. **Este plan reemplaza la secuencia anterior de once bloques.** No había bloques de desarrollo implementados, por lo que la nueva numeración no renombra trabajo terminado.
+Revisión: 25 de octubre de 2026. Se mantiene la secuencia de catorce bloques del día 24. **Se incorpora la base Flutter aportada por Juan Pablo Molina**: B02 está en progreso, no terminado. Evidencia, bloqueos y estado por función: [revisión del avance](07_revision_avance_2026_10_25.md).
+
+**Raíces de trabajo:** el repositorio es `ChessErcise/`; la aplicación está en `chess_ercise/`. Todas las rutas de aplicación de las fichas (lib, models, data, logic, presentation, test, android, pubspec) son relativas a esa carpeta. Documentación y SQL propuesto permanecen en la raíz Git. Ejecutar Flutter dentro de `chess_ercise/`; no crear otra aplicación en la raíz.
 
 ## 1. Alcance y orden
 
@@ -8,12 +10,12 @@ Se conservan todos los modos de la propuesta: LAN, online y puzzle. La priorizac
 
 Recomendación: preparación Supabase ahora → base Android → compatibilidad de tablero/motor → Auth → CRUD → puzzle/API → LAN/transporte → partida → desafíos → online → entrega. La propuesta de preparar primero LAN+puzzle y dejar online después necesita aprobación expresa.
 
-No se inicia código por aprobar una arquitectura o por cambiar el ignore. Esta intervención concilia documentación y prepara acceso al panel; no ejecuta los bloques de aplicación.
+La estructura inicial ya fue generada por el compañero en `0b0c221`; se conserva. Aprobar arquitectura o revisar avances no autoriza implementar todas las funcionalidades. La revisión del día 25 solo actualiza documentación y comprueba el estado existente.
 
 | Bloque | Resultado | Mínimo académico / producto | Estado |
 |---|---|---|---|
-| B01 | Cerrar alcance y preparar Supabase | Núcleo académico/producto o preparación | Pendiente |
-| B02 | Base Flutter Android | Núcleo académico/producto o preparación | Pendiente |
+| B01 | Cerrar alcance y preparar Supabase | Documentación revisada; cierre de decisiones/proyecto externo pendiente | En progreso |
+| B02 | Base Flutter Android | Estructura generada; verificación bloqueada por Dart 3.12.2 frente a ^3.13.5 | En progreso |
 | B03 | Compatibilidad, motor y tablero | Núcleo académico/producto o preparación | Pendiente |
 | B04 | Acceso real y menú de modos | Núcleo académico/producto o preparación | Pendiente |
 | B05 | Datos privados de ejercicios | Núcleo académico/producto o preparación | Pendiente |
@@ -59,11 +61,11 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 | Pasos | 1. Adoptar propuesta y PDF existentes. 2. Resolver prioridad online y rechazo. 3. Completar proyecto gratuito con la contraseña introducida por el usuario. 4. Identificar proyecto y acceso; GitHub sin conectar. 5. Cerrar decisiones antes de B02. |
 | Pruebas | Recorrer mockups y mínimos; verificar proyecto real en panel; diferenciar organización de proyecto; no afirmar que existe una conexión Flutter. |
 | Criterio de aceptación | Alcance del lunes acordado y proyecto identificado. Si falta proyecto o decisión, registrar exactamente lo pendiente; no crear otro por prueba. |
-| Estado | Pendiente |
+| Estado | En progreso |
 
 | Parte | Foco y mensaje de commit sugerido para el usuario |
 |---|---|
-| B01.01 · alcance | `docs: conciliar propuesta y mockups con decisiones del equipo` |
+| B01.01 · alcance | Documentación y fuentes conciliadas; decisiones finales pendientes. No repetir el commit documental existente |
 | B01.02 · preparacion_supabase | `docs: registrar preparación del proyecto Supabase` |
 
 ### B02 · Base Flutter Android
@@ -72,18 +74,18 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 |---|---|
 | Identificador | B02 |
 | Nombre | Base Flutter Android |
-| Objetivo | Crear y ejecutar una base mínima preservando los archivos del repositorio. |
-| Requisitos previos | B01 y aprobación de avance; objetivo Android confirmado. |
-| Archivos involucrados | pubspec.yaml/lock, android/, analysis_options.yaml, lib/main.dart, lib/app.dart, prueba de arranque y ajuste acotado de .gitignore. |
+| Objetivo | Validar y completar la base existente en chess_ercise/, sin repetir su generación. |
+| Requisitos previos | Revisión de B01 y aprobación de la parte a continuar; Android confirmado; acordar SDK con el compañero antes de resolver dependencias. |
+| Archivos involucrados | chess_ercise/pubspec.yaml y lock, android/, analysis_options.yaml, lib/main.dart, futuro lib/app.dart, prueba de arranque e ignores pertinentes. |
 | Conceptos Flutter | flutter create, runApp, MaterialApp, Scaffold y análisis de clase 5. |
-| Pasos | 1. Explicar diagnóstico antes de ejecutarlo. 2. Verificar SDK/dispositivos. 3. Generar solo Android sin sobrescritura forzada. 4. Revisar diff y conservar README/recursos. 5. Revisar lockfile/wrapper ignorados. 6. Ejecutar base. |
+| Pasos | 1. Aprovechar commit 0b0c221 y confirmar SDK común: el proyecto exige ^3.13.5, el equipo local tiene 3.12.2. 2. Tras autorizar la solución, comprobar SDK/dispositivos y resolver dependencias. 3. Validar contador existente. 4. Separar raíz/pantalla con el método del profesor. 5. Revisar lockfile/ignore y reproducibilidad Android. 6. Registrar pruebas/arranque reales; no desarrollar plataformas extra. |
 | Pruebas | flutter doctor -v, flutter devices, analyze, prueba de arranque y run en Android; registrar cada resultado real. |
 | Criterio de aceptación | App base arranca en objetivo, archivos previos conservados y resolución de dependencias reproducible. |
-| Estado | Pendiente |
+| Estado | En progreso |
 
 | Parte | Foco y mensaje de commit sugerido para el usuario |
 |---|---|
-| B02.01 · estructura | `chore(flutter): inicializar proyecto Android` |
+| B02.01 · estructura y SDK | Estructura ya aportada en 0b0c221. Falta alinear y validar SDK; sugerencia para una corrección realmente implementada: `chore(flutter): unificar entorno de la base existente` |
 | B02.02 · arranque | `feat(app): separar raíz y pantalla inicial` |
 | B02.03 · ignore | `chore(git): ajustar archivos versionables de Flutter Android` |
 
@@ -351,13 +353,13 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 | Online | Cuentas y partida Lichess, stream/jugadas/relojes reales; si se posterga, aprobación expresa | B12–B13 |
 | Aprendizaje y Git | Explicación por función/parte, mensajes sugeridos y aportes reales de ambos | Transversal, B14 |
 
-Todo resultado de aplicación sigue **no ejecutado**. Consultar documentación y APIs con Python o leer mockups no completa sus bloques funcionales.
+La estructura y el test de contador existen, pero las pruebas/ejecución de aplicación siguen **no ejecutadas en esta revisión** por el bloqueo de SDK. La comprobación directa de Dart confirmó 3.12.2. Consultar fuentes o disponer de un test escrito no completa sus bloques funcionales.
 
 ## 5. Comandos futuros y límites
 
-Ejemplos **no ejecutados ahora**:
+Ejemplos **no ejecutados ahora**; todos los comandos Flutter se lanzarán desde `chess_ercise/`:
 - `flutter doctor -v` y `flutter devices`: identificar entorno y objetivos; no modifican la lógica de app, pero pueden inicializar cachés del SDK.
-- `flutter create --project-name chessercise --platforms android .`: base Android en raíz; revisar preservación de archivos y diff; no forzar sobrescritura.
+- No repetir `flutter create`: la base ya existe en `chess_ercise/`. Generar otra en la raíz duplicaría el proyecto y no resolvería la diferencia de SDK.
 - `flutter pub add <paquete>`: modifica pubspec/lock y resuelve dependencias; hacerlo solo en la parte que lo necesita, con versiones verificadas.
 - `flutter analyze`: diagnósticos estáticos; no certifica red o comportamiento en uso.
 - `flutter test`: ejecutar pruebas pertinentes; no cambiar expectativas para ocultar fallos.
@@ -370,4 +372,4 @@ Preparar SQL concreto antes de pedir autorización para ejecutarlo. Crear proyec
 
 ## 6. Pendientes que condicionan el inicio
 
-Ver [requisitos](02_requisitos_proyecto.md), [revisión de fuentes](05_revision_propuesta_y_mockups.md) y [preparación Supabase](06_preparacion_supabase.md). La siguiente intervención de desarrollo debe identificar bloque **y parte** autorizados. Hasta entonces, no crear lib/, android/ o pubspec ni instalar paquetes.
+Ver [requisitos](02_requisitos_proyecto.md), [revisión de fuentes](05_revision_propuesta_y_mockups.md), [preparación Supabase](06_preparacion_supabase.md) y [avance real del equipo](07_revision_avance_2026_10_25.md). La siguiente intervención debe identificar bloque **y parte** autorizados. Se recomienda cerrar B02 sobre la app existente, empezando por alinear SDK; no crear otra base, actualizar herramientas o instalar paquetes sin revisar ese paso.
