@@ -35,7 +35,10 @@ class _AuthGateState extends State<AuthGate> {
           Expanded(
             child: _auth.currentSession == null
                 ? const LoginScreen()
-                : SessionNavigator(key: ValueKey(_auth.currentUser!.id)),
+                : SessionNavigator(
+                    key: ValueKey(_auth.currentUser!.id),
+                    userId: _auth.currentUser!.id,
+                  ),
           ),
         ],
       );

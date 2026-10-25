@@ -15,6 +15,16 @@ class PuzzleDiario {
   final List<Move> solucion;
   final Move? ultimaJugada;
 
+  Map<String, dynamic> toJson() => {
+    'puzzle': {
+      'id': id,
+      'rating': rating,
+      'fen': posicionInicial.fen,
+      if (ultimaJugada != null) 'lastMove': ultimaJugada!.uci,
+      'solution': solucion.map((m) => m.uci).toList(),
+    },
+  };
+
   factory PuzzleDiario.fromJson(Map<String, dynamic> json) {
     try {
       final puzzle = json['puzzle'] as Map<String, dynamic>;

@@ -4,14 +4,28 @@ import 'package:dartchess/dartchess.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/puzzle_diario.dart';
+import '../models/progreso_puzzle.dart';
 
 // Estado de una sesión de puzzle. La red solo se utiliza para cargar los datos.
 class PuzzleController extends ChangeNotifier {
-  PuzzleController(this.puzzle) {
+  PuzzleController(this.puzzle, {ProgresoPuzzle? progreso}) {
     posicion = puzzle.posicionInicial;
     ultimaJugada = puzzle.ultimaJugada;
     _posiciones.add(posicion);
     _jugadas.add(ultimaJugada);
+    if (progreso != null) {
+      errores = progreso.errores;
+      _pistas.addAll(progreso.pistas);
+      for (final move in puzzle.solucion.take(progreso.indice)) {
+        _aplicar(move);
+      }
+      // Si se cerró la app durante el Timer, completar solo la respuesta pendiente.
+      if (!progreso.rendido && !completado && indice.isOdd) {
+        _aplicar(puzzle.solucion[indice]);
+      }
+      if (progreso.rendido) rendirse();
+      if (completado) mensaje = '¡Puzzle resuelto!';
+    }
   }
 
   final PuzzleDiario puzzle;
@@ -27,6 +41,15 @@ class PuzzleController extends ChangeNotifier {
   int vista = 0;
   bool rendido = false;
   Square? pista;
+  final Set<int> _pistas = {};
+  int get pistasUsadas => _pistas.length;
+  bool get finalizado => completado || rendido;
+  ProgresoPuzzle get estadoGuardado => ProgresoPuzzle(
+    indice: indice,
+    errores: errores,
+    pistas: Set.unmodifiable(_pistas),
+    rendido: rendido,
+  );
 
   Position get posicionVisible => _posiciones[vista];
   Move? get jugadaVisible => _jugadas[vista];
@@ -57,7 +80,10 @@ class PuzzleController extends ChangeNotifier {
   void mostrarPista() {
     if (!puedeMover) return;
     final move = puzzle.solucion[indice];
-    if (move is NormalMove) pista = move.from;
+    if (move is NormalMove) {
+      pista = move.from;
+      _pistas.add(indice);
+    }
     notifyListeners();
   }
 
@@ -122,11 +148,12 @@ class PuzzleController extends ChangeNotifier {
   }
 
   void reiniciar() {
+    if (finalizado) return;
     _respuesta?.cancel();
     posicion = puzzle.posicionInicial;
     ultimaJugada = puzzle.ultimaJugada;
     indice = 0;
-    errores = 0;
+    // Reiniciar la posición no borra errores ni pistas del intento diario.
     esperando = false;
     mensaje = 'Encuentra la mejor jugada.';
     rendido = false;

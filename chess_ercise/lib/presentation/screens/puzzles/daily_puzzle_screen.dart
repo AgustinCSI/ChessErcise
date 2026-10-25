@@ -1,40 +1,45 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-import '../../../data/lichess_puzzles_service.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/puzzles_provider.dart';
 import '../../../models/puzzle_diario.dart';
 import 'puzzle_screen.dart';
 
 class DailyPuzzleScreen extends StatefulWidget {
-  const DailyPuzzleScreen({super.key, this.service});
+  const DailyPuzzleScreen({super.key, this.diario});
 
-  final LichessPuzzlesService? service;
+  final PuzzlesProvider? diario;
 
   @override
   State<DailyPuzzleScreen> createState() => _DailyPuzzleScreenState();
 }
 
-class _DailyPuzzleScreenState extends State<DailyPuzzleScreen> {
-  late final _service = widget.service ?? LichessPuzzlesService();
+class _DailyPuzzleScreenState extends State<DailyPuzzleScreen>
+    with WidgetsBindingObserver {
+  late final _diario = widget.diario ?? context.read<PuzzlesProvider>();
   late Future<PuzzleDiario> _puzzle;
-  CancelToken? _cancel;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _cargar();
   }
 
   void _cargar() {
-    _cancel?.cancel();
-    _cancel = CancelToken();
-    _puzzle = _service.obtenerDiario(cancelToken: _cancel);
+    _puzzle = _diario.obtenerDiario();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) setState(_cargar);
   }
 
   @override
   void dispose() {
-    _cancel?.cancel();
-    if (widget.service == null) _service.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -81,6 +86,10 @@ class _DailyPuzzleScreenState extends State<DailyPuzzleScreen> {
                   );
                 }
                 final puzzle = snapshot.data!;
+                final progreso = _diario.progresoPara(puzzle);
+                final terminado =
+                    progreso.rendido ||
+                    progreso.indice == puzzle.solucion.length;
                 return Card(
                   child: Padding(
                     padding: const EdgeInsets.all(24),
@@ -110,12 +119,24 @@ class _DailyPuzzleScreenState extends State<DailyPuzzleScreen> {
                         ),
                         const SizedBox(height: 24),
                         FilledButton(
-                          onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => PuzzleScreen(puzzle: puzzle),
-                            ),
+                          onPressed: () async {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => PuzzleScreen(
+                                  puzzle: puzzle,
+                                  diario: _diario,
+                                ),
+                              ),
+                            );
+                            if (mounted) setState(() {});
+                          },
+                          child: Text(
+                            terminado
+                                ? 'Ver resumen'
+                                : progreso.indice > 0
+                                ? 'Continuar puzzle'
+                                : 'Resolver puzzle',
                           ),
-                          child: const Text('Resolver puzzle'),
                         ),
                         const SizedBox(height: 16),
                         const Text(

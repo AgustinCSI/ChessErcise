@@ -5,6 +5,8 @@ import 'package:chess_ercise/logic/puzzle_controller.dart';
 import 'package:chess_ercise/models/puzzle_diario.dart';
 import 'package:chess_ercise/presentation/screens/puzzles/puzzle_screen.dart';
 import 'package:chess_ercise/presentation/theme/app_theme.dart';
+import 'package:chess_ercise/presentation/widgets/tablero_widget.dart';
+import 'package:chess_ercise/presentation/widgets/puzzle_toolbar.dart';
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -58,9 +60,11 @@ void main() {
       expect(controller.completado, isTrue);
       expect(controller.posicion.isCheckmate, isTrue);
       expect(controller.puedeMover, isFalse);
+      final finalFen = controller.posicion.fen;
       controller.reiniciar();
-      expect(controller.posicion.fen, start);
-      expect(controller.errores, 0);
+      expect(controller.posicion.fen, finalFen);
+      expect(controller.completado, isTrue);
+      expect(controller.errores, 1);
       controller.dispose();
     },
   );
@@ -135,9 +139,9 @@ void main() {
     expect(controller.posicionVisible.isCheckmate, isTrue);
     expect(controller.puedeMover, isFalse);
     controller.reiniciar();
-    expect(controller.rendido, isFalse);
-    expect(controller.totalJugadas, 0);
-    expect(controller.puedeMover, isTrue);
+    expect(controller.rendido, isTrue);
+    expect(controller.totalJugadas, 3);
+    expect(controller.puedeMover, isFalse);
     controller.dispose();
   });
 
@@ -162,6 +166,9 @@ void main() {
     await tester.tap(find.byTooltip('Rendirse y ver solución'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ver solución'));
+    await tester.pumpAndSettle();
+    expect(find.text('Te rendiste'), findsOneWidget);
+    await tester.tap(find.text('Revisar tablero'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Te rendiste.'), findsOneWidget);
     await tester.tap(find.byTooltip('Jugada siguiente'));
@@ -199,25 +206,40 @@ void main() {
     castleController.dispose();
   });
 
-  testWidgets('Board renders on a small phone and landscape without overflow', (
-    tester,
-  ) async {
-    for (final size in [const Size(320, 640), const Size(740, 360)]) {
-      await tester.binding.setSurfaceSize(size);
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.claro,
-          home: PuzzleScreen(
-            key: ValueKey(size),
-            puzzle: PuzzleDiario.fromJson(fixture()),
+  testWidgets(
+    'Puzzle fits phone and desktop sizes without scrolling or clipping',
+    (tester) async {
+      for (final size in [
+        const Size(320, 480),
+        const Size(320, 640),
+        const Size(390, 844),
+        const Size(740, 360),
+        const Size(1280, 720),
+      ]) {
+        await tester.binding.setSurfaceSize(size);
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.claro,
+            home: PuzzleScreen(
+              key: ValueKey(size),
+              puzzle: PuzzleDiario.fromJson(fixture()),
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Juegas con negras'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    }
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.binding.setSurfaceSize(null);
-  });
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Juegas con negras'), findsOneWidget);
+        expect(find.byType(SingleChildScrollView), findsNothing);
+        final board = tester.getRect(find.byType(TableroWidget));
+        final toolbar = tester.getRect(find.byType(PuzzleToolbar));
+        final reset = tester.getRect(find.byTooltip('Volver a intentarlo'));
+        expect(board.width, greaterThan(0));
+        expect(board.width, closeTo(board.height, 0.01));
+        expect(board.bottom, lessThanOrEqualTo(toolbar.top));
+        expect(reset.bottom, lessThanOrEqualTo(toolbar.top));
+        expect(tester.takeException(), isNull);
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.binding.setSurfaceSize(null);
+    },
+  );
 }
