@@ -1,4 +1,7 @@
 # Miscellaneous
+# Documentacion interna de bloques de trabajo
+/docs/bloques/
+
 *.class
 *.lock
 *.log
