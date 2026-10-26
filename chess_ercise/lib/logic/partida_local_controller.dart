@@ -28,6 +28,23 @@ class PartidaLocalController extends ChangeNotifier {
   RetoLocal? _reto;
   final Map<String, int> _repeticiones = {};
   bool _tablasPorRegla = false;
+  final List<Position> _posiciones = [];
+  final List<Move> _jugadas = [];
+
+  int get totalJugadas => _jugadas.length;
+  Position posicionEn(int vista) => vista == 0
+      ? (_posiciones.isEmpty ? _posicion : _posiciones.first)
+      : _posiciones[vista];
+  Move? jugadaEn(int vista) => vista == 0 ? null : _jugadas[vista - 1];
+  List<({int numero, Side lado, String san, int vista})> get historial => [
+    for (var i = 0; i < _jugadas.length; i++)
+      (
+        numero: _posiciones[i].fullmoves,
+        lado: _posiciones[i].turn,
+        san: _posiciones[i].makeSan(_jugadas[i]).$2,
+        vista: i + 1,
+      ),
+  ];
 
   Position get posicion => _posicion;
   FaseLocal get fase => _fase;
@@ -67,7 +84,10 @@ class PartidaLocalController extends ChangeNotifier {
       }
     }
     final quienJugo = _posicion.turn;
+    if (_posiciones.isEmpty) _posiciones.add(_posicion);
     _posicion = _posicion.play(move);
+    _posiciones.add(_posicion);
+    _jugadas.add(move);
     _ultimaJugada = move;
     final clave = _clave(_posicion);
     _repeticiones[clave] = (_repeticiones[clave] ?? 0) + 1;
@@ -117,6 +137,8 @@ class PartidaLocalController extends ChangeNotifier {
   }
 
   void reiniciar() {
+    _posiciones.clear();
+    _jugadas.clear();
     _posicion = Chess.initial;
     _ultimaJugada = null;
     _capturador = null;

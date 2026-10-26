@@ -183,6 +183,7 @@ void main() {
     const Size(360, 640),
     const Size(800, 1280),
     const Size(844, 390),
+    const Size(1024, 800),
   ]) {
     testWidgets('Sin desbordamiento en $size con texto ampliado', (
       tester,
@@ -207,6 +208,9 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(TableroInteractivo), findsOneWidget);
+      final centro = tester.getCenter(find.byType(TableroInteractivo));
+      expect(centro.dx, closeTo(size.width / 2, 1));
+      expect(centro.dy, closeTo(size.height / 2, 1));
       expect(tester.takeException(), isNull);
     });
   }

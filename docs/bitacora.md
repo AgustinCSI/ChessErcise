@@ -19,6 +19,10 @@ Fecha inicial: 23 de octubre de 2026, America/Santiago.
 
 | 2026-10-25 | Local en un dispositivo, rama MultijugadorLocal | Usuario reemplaza LAN por juego frente a frente y prioriza local antes de online. Tablero compartido extraído; controller de partida, catálogo inicial y paneles orientados con retos implementados | Capturas, aceptar/Listo y rechazo/shot en código y pruebas; menú habilitado. Cambios previos de puzzle conservados; sin commits ni transporte LAN | Revisar modo local en Android físico con dos personas; después online. Alcance y funciones en documento 10 |
 
+| 2026-10-26 | Revisión visual tras merge de perfil ec26edb | Árbol inicial limpio; inspeccionados componentes existentes de perfil y menú inferior; sesión real abierta, jugadas locales y captura/reto/rechazo/continuación probados | Corregido centrado del juego en ventanas horizontales sin duplicar componentes. Regresión 1024x800 reproducida antes del arreglo; análisis correcto y 51 pruebas aprobadas después | Revisar comodidad entre dos personas en Android; continuar online después del modo local. Reporte interno B10_02_revision_visual_y_merge_perfil.md; sin commits |
+
+| 2026-10-26 | Dos modos locales y revisión de mockups | Usuario solicita Frente a frente y recuperar Local Wi-Fi; revisadas páginas 2/7/10–13 del PDF; paleta compartida, tarjetas de selección, transporte y pantalla Wi-Fi implementados | Tablero, motor, ficha, retos y tira de jugadas reutilizados. Sockets reales en loopback prueban ambos jugadores y desafíos; APK Android compilado; sin modificar Supabase | Probar dos Android en la misma Wi-Fi y revisar comodidad; después continuar online. Documento 11 y reportes internos por parte; sin commits |
+
 ## Estado por bloque
 
 | Bloque | Estado técnico | Documento que se creará al trabajar | Aprobación para avanzar |
@@ -31,9 +35,9 @@ Fecha inicial: 23 de octubre de 2026, America/Santiago.
 | B06 | Pendiente | `bloques/B06/B06_01_lista.md` | Pendiente |
 | B07 | En progreso: API/detalle/animaciones en codigo; validar ejecucion | `bloques/B07/B07_01_modelo_api.md` | Pendiente |
 | B08 | En progreso: resolucion/cache/resumen; falta ejercicio por fallo y Listo | `bloques/B08/B08_01_posicion.md` | Pendiente |
-| B09 | En progreso: base local compartida y controller en memoria; LAN sustituida | `bloques/B09/B09_01_tablero_compartido.md` y B09_02 | Implementación local autorizada |
-| B10 | En progreso: juego frente a frente implementado y probado; falta revisión física | `bloques/B10/B10_01_partida_frente_a_frente.md` | Implementación local autorizada |
-| B11 | En progreso: retos/Listo/shot probados; catálogo privado pendiente | `bloques/B11/B11_01_retos_por_perspectiva.md` | Implementación local autorizada |
+| B09 | En progreso: base compartida y transporte Wi-Fi recuperado; sockets reales probados | `bloques/B09/B09_04_transporte_wifi.md` | Ambos modos locales autorizados |
+| B10 | En progreso: Frente a frente y Wi-Fi con historial compartido; falta revisión física | `bloques/B10/B10_03_historial_wifi.md` | Ambos modos locales autorizados |
+| B11 | En progreso: retos/Listo/shot locales y sincronizados; catálogo privado pendiente | `bloques/B11/B11_02_retos_wifi.md` | Ambos modos locales autorizados |
 | B12 | Pendiente; sigue después de revisar local | `bloques/B12/B12_01_autorizacion.md` | Siguiente etapa solicitada |
 | B13 | Pendiente; depende de acceso online B12 | `bloques/B13/B13_01_stream.md` | Siguiente etapa solicitada |
 | B14 | Pendiente | `bloques/B14/B14_01_validacion.md` | Pendiente |

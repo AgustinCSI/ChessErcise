@@ -2,6 +2,8 @@ import 'package:chessground/chessground.dart';
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+
 // Extraído del TableroWidget existente: un solo controlador visual para ambos modos.
 class TableroInteractivo extends StatefulWidget {
   const TableroInteractivo({
@@ -73,6 +75,7 @@ class _TableroInteractivoState extends State<TableroInteractivo> {
     controller: _tablero,
     orientation: widget.orientacion,
     settings: ChessboardSettings(
+      colorScheme: AppTheme.tablero,
       pieceOrientationBehavior: widget.frenteAFrente
           ? PieceOrientationBehavior.opponentUpsideDown
           : PieceOrientationBehavior.facingUser,

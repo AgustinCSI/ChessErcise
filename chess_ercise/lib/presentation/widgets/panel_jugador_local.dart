@@ -16,6 +16,12 @@ class PanelJugadorLocal extends StatelessWidget {
     required this.nombre,
     required this.onSalir,
     required this.onReiniciar,
+    this.onElegirReto,
+    this.onResponder,
+    this.onListo,
+    this.mostrarFicha = true,
+    this.habilitado = true,
+    this.textoReinicio = 'Nueva partida',
   });
 
   final PartidaLocalController partida;
@@ -23,6 +29,12 @@ class PanelJugadorLocal extends StatelessWidget {
   final String nombre;
   final VoidCallback onSalir;
   final VoidCallback onReiniciar;
+  final void Function(String)? onElegirReto;
+  final void Function(bool)? onResponder;
+  final VoidCallback? onListo;
+  final bool mostrarFicha;
+  final bool habilitado;
+  final String textoReinicio;
 
   String get _color => lado == Side.white ? 'Blancas' : 'Negras';
 
@@ -57,9 +69,24 @@ class PanelJugadorLocal extends StatelessWidget {
               '${RetoLocal.valorDe(partida.piezaCapturada!) == 1 ? 'punto' : 'puntos'}. Elige el reto:',
             ),
             for (final reto in partida.opciones)
-              OutlinedButton(
-                onPressed: () => partida.elegirReto(lado, reto.id),
-                child: Text('${reto.titulo} · ${reto.indicacion}'),
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer,
+                  foregroundColor: Theme.of(context)
+                      .colorScheme
+                      .onPrimaryContainer,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 18,
+                  ),
+                ),
+                onPressed: () => onElegirReto != null
+                    ? onElegirReto!(reto.id)
+                    : partida.elegirReto(lado, reto.id),
+                icon: const Icon(Icons.fitness_center),
+                label: Text('${reto.titulo} · ${reto.indicacion}'),
               ),
           ],
         );
@@ -75,11 +102,19 @@ class PanelJugadorLocal extends StatelessWidget {
               runSpacing: 4,
               children: [
                 FilledButton(
-                  onPressed: () => partida.responder(lado, acepta: true),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF087F52),
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () => onResponder != null
+                      ? onResponder!(true)
+                      : partida.responder(lado, acepta: true),
                   child: const Text('Aceptar reto'),
                 ),
                 OutlinedButton(
-                  onPressed: () => partida.responder(lado, acepta: false),
+                  onPressed: () => onResponder != null
+                      ? onResponder!(false)
+                      : partida.responder(lado, acepta: false),
                   child: const Text('Rechazar'),
                 ),
               ],
@@ -93,7 +128,7 @@ class PanelJugadorLocal extends StatelessWidget {
           children: [
             Text('${partida.reto!.titulo} · ${partida.reto!.indicacion}'),
             FilledButton(
-              onPressed: () => partida.listo(lado),
+              onPressed: onListo ?? () => partida.listo(lado),
               child: const Text('Listo'),
             ),
           ],
@@ -120,7 +155,7 @@ class PanelJugadorLocal extends StatelessWidget {
               ),
             ),
             FilledButton(
-              onPressed: () => partida.listo(lado),
+              onPressed: onListo ?? () => partida.listo(lado),
               child: const Text('Continuar'),
             ),
           ],
@@ -130,10 +165,7 @@ class PanelJugadorLocal extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(partida.resultado),
-            FilledButton(
-              onPressed: onReiniciar,
-              child: const Text('Nueva partida'),
-            ),
+            FilledButton(onPressed: onReiniciar, child: Text(textoReinicio)),
           ],
         );
     }
@@ -142,40 +174,46 @@ class PanelJugadorLocal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colores = Theme.of(context).colorScheme;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      decoration: BoxDecoration(
-        color: _activo ? colores.primaryContainer : colores.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _activo ? colores.primary : colores.outlineVariant,
-          width: _activo ? 2 : 1,
+    return AbsorbPointer(
+      absorbing: !habilitado,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        decoration: BoxDecoration(
+          color: _activo
+              ? colores.primaryContainer
+              : colores.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: _activo ? colores.primary : colores.outlineVariant,
+            width: _activo ? 2 : 1,
+          ),
         ),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(child: PlayerInfo(nombre: '$nombre · $_color')),
-                IconButton(
-                  tooltip: 'Salir de la partida',
-                  onPressed: onSalir,
-                  icon: const Icon(Icons.close),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (mostrarFicha)
+                Row(
+                  children: [
+                    Expanded(child: PlayerInfo(nombre: '$nombre · $_color')),
+                    IconButton(
+                      tooltip: 'Salir de la partida',
+                      onPressed: onSalir,
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: KeyedSubtree(
-                key: ValueKey('${partida.fase.name}-$_activo'),
-                child: _acciones(context),
+              const SizedBox(height: 8),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: KeyedSubtree(
+                  key: ValueKey('${partida.fase.name}-$_activo'),
+                  child: _acciones(context),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

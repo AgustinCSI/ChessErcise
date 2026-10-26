@@ -1,5 +1,9 @@
 # 10 · Multijugador local frente a frente
 
+> Alcance ampliado posteriormente el 26-10: Frente a frente se conserva y Local Wi-Fi vuelve como segunda opción. Este documento describe el primer modo; el selector, diseño actualizado y transporte Wi-Fi están en [documento 11](11_modos_locales_wifi_y_estilo.md).
+
+> Revisión del 26-10-2026 tras el merge de perfil ec26edb: perfil y menú inferior ya incorporados. Se revisó local desde una sesión real y se corrigió el centrado de tablero/paneles en ventanas horizontales. Análisis sin incidencias y 51 pruebas aprobadas. Los nombres locales siguen siendo manuales; no se duplicó ni modificó el servicio de perfil. Las menciones al perfil como trabajo pendiente en el texto original describen el estado previo a ese merge.
+
 Actualización del 25-10-2026, rama `MultijugadorLocal`. La instrucción del usuario reemplaza el diseño LAN: dos personas juegan en **un solo celular o tablet**, sin moverlo ni girarlo entre turnos. Primero se implementa y revisa este modo; después se continúa online. Perfil y detalles del puzzle siguen a cargo del compañero.
 
 ## Alcance vigente
