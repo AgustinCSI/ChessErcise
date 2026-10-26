@@ -15,11 +15,13 @@ class ProfileGate extends StatefulWidget {
     this.service,
     this.child,
     this.imagePicker,
+    this.onReady,
   });
   final String userId;
   final PerfilService? service;
   final Widget? child;
   final ImagePicker? imagePicker;
+  final ValueChanged<bool>? onReady;
 
   @override
   State<ProfileGate> createState() => _ProfileGateState();
@@ -32,6 +34,16 @@ class _ProfileGateState extends State<ProfileGate> with WidgetsBindingObserver {
   );
 
   bool _comprobado = false;
+  bool? _ultimoAviso;
+
+  void _avisarPreparado() {
+    final listo = !_perfil.cargando;
+    if (_ultimoAviso == listo) return;
+    _ultimoAviso = listo;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _ultimoAviso == listo) widget.onReady?.call(listo);
+    });
+  }
 
   @override
   void initState() {
@@ -58,6 +70,7 @@ class _ProfileGateState extends State<ProfileGate> with WidgetsBindingObserver {
     child: ListenableBuilder(
       listenable: _perfil,
       builder: (context, _) {
+        _avisarPreparado();
         if (!_perfil.cargando && _perfil.errorCarga == null) _comprobado = true;
         // El formulario conserva su State durante comprobaciones de segundo plano,
         // incluso si fallan. La consulta remota sigue bloqueando la interacción.
@@ -71,16 +84,16 @@ class _ProfileGateState extends State<ProfileGate> with WidgetsBindingObserver {
                 inicializar: true,
                 imagePicker: widget.imagePicker,
               )
-            else
+            else if (_perfil.errorCarga == null)
               Scaffold(
                 appBar: AppBar(
                   title: const Text('Comprobando perfil'),
                   actions: const [SalirButton()],
                 ),
-                body: _perfil.errorCarga == null
-                    ? const Center(child: CircularProgressIndicator())
-                    : null,
-              ),
+                body: const Center(child: CircularProgressIndicator()),
+              )
+            else
+              const SizedBox.expand(),
             if (_comprobado && _perfil.cargando) ...[
               const ModalBarrier(dismissible: false, color: Colors.black12),
               const Center(child: CircularProgressIndicator()),

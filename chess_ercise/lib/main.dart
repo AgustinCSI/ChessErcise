@@ -4,19 +4,21 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 import 'config/app_config.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  var disponible = false;
-  if (AppConfig.configurado) {
-    try {
-      await Supabase.initialize(
-        url: AppConfig.supabaseUrl,
-        publishableKey: AppConfig.supabaseKey,
-      );
-      disponible = true;
-    } catch (_) {
-      // La app explica cómo corregir la configuración sin mostrar credenciales.
-    }
+  // La inicialización y la intro avanzan a la vez; Auth espera a que ambas terminen.
+  runApp(ChessErciseApp(inicializacion: inicializarSupabase()));
+}
+
+Future<bool> inicializarSupabase() async {
+  if (!AppConfig.configurado) return false;
+  try {
+    await Supabase.initialize(
+      url: AppConfig.supabaseUrl,
+      publishableKey: AppConfig.supabaseKey,
+    );
+    return true;
+  } catch (_) {
+    return false;
   }
-  runApp(ChessErciseApp(supabaseDisponible: disponible));
 }

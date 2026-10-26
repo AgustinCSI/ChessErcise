@@ -21,26 +21,36 @@ class _MainScreenState extends State<MainScreen> {
       index: _indice,
       children: const [HomeScreen(), ProfileScreen()],
     ),
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: _indice,
-      onDestinationSelected: (index) => setState(() => _indice = index),
-      destinations: [
-        NavigationDestination(
-          label: 'Inicio',
-          icon: Image(
-            image: PieceSet
-                .cburnett
-                .assets[const Piece(color: Side.white, role: Role.king).kind]!,
-            width: 28,
-            height: 28,
-          ),
+    bottomNavigationBar: DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 1),
+        child: NavigationBar(
+          selectedIndex: _indice,
+          onDestinationSelected: (index) => setState(() => _indice = index),
+          destinations: [
+            NavigationDestination(
+              label: 'Inicio',
+              icon: Image(
+                image:
+                    PieceSet.cburnett.assets[const Piece(
+                      color: Side.white,
+                      role: Role.king,
+                    ).kind]!,
+                width: 28,
+                height: 28,
+              ),
+            ),
+            const NavigationDestination(
+              label: 'Perfil',
+              icon: Icon(Icons.person_outline),
+              selectedIcon: Icon(Icons.person),
+            ),
+          ],
         ),
-        const NavigationDestination(
-          label: 'Perfil',
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person),
-        ),
-      ],
+      ),
     ),
   );
 }

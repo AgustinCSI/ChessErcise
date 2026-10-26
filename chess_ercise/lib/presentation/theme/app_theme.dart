@@ -4,6 +4,7 @@ import 'package:dartchess/dartchess.dart';
 
 // Cambiar esta paleta modifica todas las pantallas que usan el tema.
 class AppTheme {
+  static const colorIntro = Color(0xFFF7A8B5);
   static const colorPrincipal = Color(0xFFA0144B);
   static const colorFondo = Color(0xFFFFDEF0);
   static const colorTarjeta = Color(0xFFEF729F);
@@ -14,6 +15,8 @@ class AppTheme {
   static const colorTextoSecundario = Color(0xFF49313E);
   static const colorAceptar = Color(0xFF087F52);
   static const colorRechazar = Color(0xFFC4123D);
+  static const colorBarra = Color(0xFFFFF1F8);
+  static const colorBordeBarra = Color(0xFFE4A1BD);
 
   // Un único esquema para puzzle, frente a frente y Wi-Fi.
   static const tablero = ChessboardColorScheme(
@@ -58,18 +61,43 @@ class AppTheme {
       surface: const Color(0xFFFFF1F8),
     ),
     scaffoldBackgroundColor: colorFondo,
+    dividerColor: colorBordeBarra,
     textTheme: Typography.material2021().black.apply(
       bodyColor: colorTexto,
       displayColor: colorTexto,
     ),
     appBarTheme: const AppBarTheme(
-      backgroundColor: colorFondo,
+      backgroundColor: colorBarra,
       foregroundColor: colorTexto,
       centerTitle: false,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      shape: Border(bottom: BorderSide(color: colorBordeBarra)),
     ),
-    navigationBarTheme: const NavigationBarThemeData(
-      backgroundColor: colorFondo,
-      indicatorColor: Color(0xFFF8B5CF),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: colorBarra,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      height: 76,
+      indicatorColor: colorPrincipal,
+      iconTheme: WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          color: states.contains(WidgetState.selected)
+              ? Colors.white
+              : colorTexto,
+        ),
+      ),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => TextStyle(
+          color: states.contains(WidgetState.selected)
+              ? colorPrincipal
+              : colorTexto,
+          fontWeight: states.contains(WidgetState.selected)
+              ? FontWeight.w700
+              : FontWeight.w500,
+          fontSize: 12,
+        ),
+      ),
     ),
     inputDecorationTheme: const InputDecorationTheme(
       filled: true,

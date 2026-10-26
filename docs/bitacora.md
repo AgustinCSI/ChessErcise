@@ -27,6 +27,8 @@ Fecha inicial: 23 de octubre de 2026, America/Santiago.
 
 | 2026-10-26 | Respaldo de imágenes del historial | Revisada captura de asset fallido; bundle y HTTP del alfil/rey correctos actualmente; puzzle real abre sin reproducir el fallo intermitente | Tira compartida muestra letra SAN cuando falla una imagen, sin perder historial o selección; 64 pruebas aprobadas, incluida simulación de recursos ausentes | Revisar puzzle/Wi-Fi actualizados; reporte B10_04_respaldo_assets_historial.md. Sin commits |
 
+| 2026-10-26 | Merge de main e integración de barras | Merge ya iniciado desde f9a7f63 sobre MultijugadorLocal 5129bca; único conflicto en el tema, resuelto combinando intro y paleta existente | Introducción conservada; barras claras con borde, contraste y selección visibles. Corregida espera inestable de prueba de intro; análisis correcto y 69 pruebas aprobadas | Terminar commit local autorizado, sin push. Documento 12 y reporte B02_05_merge_intro_tema.md |
+
 ## Estado por bloque
 
 | Bloque | Estado técnico | Documento que se creará al trabajar | Aprobación para avanzar |
