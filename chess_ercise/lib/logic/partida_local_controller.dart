@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/foundation.dart';
 
@@ -14,8 +16,9 @@ enum FaseLocal {
 
 // Una sola autoridad en memoria: no crea salas, sockets ni cuentas invitadas.
 class PartidaLocalController extends ChangeNotifier {
-  PartidaLocalController({Position? inicial})
-    : _posicion = inicial ?? Chess.initial {
+  PartidaLocalController({Position? inicial, Random? azar})
+    : _posicion = inicial ?? Chess.initial,
+      _azar = azar ?? Random() {
     _repeticiones[_clave(_posicion)] = 1;
     if (_posicion.isGameOver) _fase = FaseLocal.finalizada;
   }
@@ -26,8 +29,27 @@ class PartidaLocalController extends ChangeNotifier {
   Side? _capturador;
   Role? _piezaCapturada;
   RetoLocal? _reto;
+  final Random _azar;
+  List<RetoLocal> _opciones = const [];
   final Map<String, int> _repeticiones = {};
   bool _tablasPorRegla = false;
+  final List<Position> _posiciones = [];
+  final List<Move> _jugadas = [];
+
+  int get totalJugadas => _jugadas.length;
+  Position posicionEn(int vista) => vista == 0
+      ? (_posiciones.isEmpty ? _posicion : _posiciones.first)
+      : _posiciones[vista];
+  Move? jugadaEn(int vista) => vista == 0 ? null : _jugadas[vista - 1];
+  List<({int numero, Side lado, String san, int vista})> get historial => [
+    for (var i = 0; i < _jugadas.length; i++)
+      (
+        numero: _posiciones[i].fullmoves,
+        lado: _posiciones[i].turn,
+        san: _posiciones[i].makeSan(_jugadas[i]).$2,
+        vista: i + 1,
+      ),
+  ];
 
   Position get posicion => _posicion;
   FaseLocal get fase => _fase;
@@ -37,9 +59,7 @@ class PartidaLocalController extends ChangeNotifier {
   Role? get piezaCapturada => _piezaCapturada;
   RetoLocal? get reto => _reto;
   bool get puedeMover => _fase == FaseLocal.jugando;
-  List<RetoLocal> get opciones => _piezaCapturada == null
-      ? const []
-      : RetoLocal.paraPieza(_piezaCapturada!);
+  List<RetoLocal> get opciones => _opciones;
 
   String get resultado {
     if (_fase != FaseLocal.finalizada) return '';
@@ -52,7 +72,7 @@ class PartidaLocalController extends ChangeNotifier {
   // La FEN omite contadores para reconocer una posición repetida.
   String _clave(Position posicion) => posicion.fen.split(' ').take(4).join(' ');
 
-  void jugar(Move move) {
+  void jugar(Move move, {List<String>? opcionesReto}) {
     if (!puedeMover || !_posicion.isLegal(move)) return;
     Piece? capturada;
     if (move is NormalMove) {
@@ -66,8 +86,31 @@ class PartidaLocalController extends ChangeNotifier {
         capturada = Piece(color: _posicion.turn.opposite, role: Role.pawn);
       }
     }
+    List<RetoLocal> opciones = const [];
+    if (capturada != null) {
+      if (opcionesReto == null) {
+        opciones = RetoLocal.seleccionarParaPieza(capturada.role, _azar);
+      } else {
+        final disponibles = {
+          for (final reto in RetoLocal.paraPieza(capturada.role)) reto.id: reto,
+        };
+        if (opcionesReto.length != 2 ||
+            opcionesReto.toSet().length != 2 ||
+            opcionesReto.any((id) => !disponibles.containsKey(id))) {
+          return;
+        }
+        opciones = List.unmodifiable(
+          opcionesReto.map((id) => disponibles[id]!),
+        );
+      }
+    } else if (opcionesReto != null && opcionesReto.isNotEmpty) {
+      return;
+    }
     final quienJugo = _posicion.turn;
+    if (_posiciones.isEmpty) _posiciones.add(_posicion);
     _posicion = _posicion.play(move);
+    _posiciones.add(_posicion);
+    _jugadas.add(move);
     _ultimaJugada = move;
     final clave = _clave(_posicion);
     _repeticiones[clave] = (_repeticiones[clave] ?? 0) + 1;
@@ -76,6 +119,7 @@ class PartidaLocalController extends ChangeNotifier {
     if (capturada != null) {
       _capturador = quienJugo;
       _piezaCapturada = capturada.role;
+      _opciones = opciones;
       _fase = FaseLocal.eligiendoReto;
     } else {
       _continuar();
@@ -104,6 +148,7 @@ class PartidaLocalController extends ChangeNotifier {
       return;
     }
     _reto = null;
+    _opciones = const [];
     _capturador = null;
     _piezaCapturada = null;
     _continuar();
@@ -117,11 +162,14 @@ class PartidaLocalController extends ChangeNotifier {
   }
 
   void reiniciar() {
+    _posiciones.clear();
+    _jugadas.clear();
     _posicion = Chess.initial;
     _ultimaJugada = null;
     _capturador = null;
     _piezaCapturada = null;
     _reto = null;
+    _opciones = const [];
     _tablasPorRegla = false;
     _repeticiones
       ..clear()

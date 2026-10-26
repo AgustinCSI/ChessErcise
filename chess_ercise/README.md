@@ -1,12 +1,26 @@
 # ChessErcise · Flutter Android
 
+## Ejercicios disponibles
+
+El catálogo contiene nueve ejercicios. En cada captura se sortean **solo dos opciones distintas**, que se conservan durante el reto. En Wi-Fi, el anfitrión comparte el mismo par con el invitado; ambos dispositivos deben usar el APK actualizado (protocolo 2). [Ver lista completa y cantidades](../docs/13_catalogo_y_retos_aleatorios.md).
+
+## Elegir un modo local
+
+Inicio → **Multijugador local** abre dos cuadros: **Frente a frente** (un dispositivo) y **Local Wi-Fi** (dos Android en la misma red). Se conserva el primero y se recupera el segundo por solicitud del equipo.
+
+En Wi-Fi, una persona crea la sala y comparte el acceso IP:puerto/código; la otra lo introduce para unirse. La pantalla reutiliza el tablero y la tira de jugadas del puzzle, con revisión de posiciones y retorno a la partida en vivo. Los retos se muestran en un diálogo y se sincronizan con el anfitrión.
+
+El navegador permite jugar Frente a frente y ver el selector/lobby. Para conectar por Wi-Fi se requiere la aplicación Android. [Instrucciones, límites y partes para commit](../docs/11_modos_locales_wifi_y_estilo.md).
+
+Verificación del 26-10-2026: análisis sin incidencias, 62 pruebas aprobadas y APK debug compilado en `build/app/outputs/flutter-apk/app-debug.apk`. Falta validar la conexión con dos Android físicos.
+
 ## Multijugador local en un dispositivo
 
-Después de ingresar, abre **Multijugador local · Un dispositivo**, escribe los nombres y pulsa **Comenzar partida**. Coloca el celular o tablet entre ambos: blancas en un extremo y negras en el otro. Sus piezas y controles miran hacia su lado; el tablero no gira al cambiar de turno.
+Después de ingresar, abre **Multijugador local → Frente a frente**, escribe los nombres y pulsa **Comenzar partida**. Coloca el celular o tablet entre ambos: blancas en un extremo y negras en el otro. Sus piezas y controles miran hacia su lado; el tablero no gira al cambiar de turno.
 
 Al capturar, el capturador elige un reto del catálogo local inicial. El rival acepta y marca **Listo**, o rechaza y ve **Tomar shot** antes de continuar. El tablero espera durante ese flujo. No requiere Wi-Fi entre jugadores ni una segunda cuenta; la entrada actual al menú usa la sesión existente. La partida no se guarda al salir.
 
-Este modo reemplaza el diseño LAN. Primero se revisa local y después se implementa online. [Detalles, límites y plan de commits](../docs/10_multijugador_local_un_dispositivo.md).
+Este modo convive con Local Wi-Fi. Primero se revisan los modos locales y después se implementa online. [Detalles de Frente a frente](../docs/10_multijugador_local_un_dispositivo.md).
 
 ## Abrir sin emulador
 

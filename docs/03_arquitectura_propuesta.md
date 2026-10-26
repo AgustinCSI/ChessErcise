@@ -1,5 +1,7 @@
 # 03 · Arquitectura Flutter propuesta
 
+> Actualización vigente del 26-10: se conservan Frente a frente y Local Wi-Fi como dos opciones. Se recuperó el transporte LAN con el SDK Dart y se comparten tablero, motor, retos e historial del puzzle. La nota anterior que descartaba LAN ya no aplica al alcance actual. [Arquitectura y funciones implementadas](11_modos_locales_wifi_y_estilo.md).
+
 > Alcance vigente del 25-10: el usuario reemplazó LAN/Wi-Fi por dos jugadores en un solo dispositivo. La sección 5 y los componentes de transporte del árbol quedan como antecedente descartado para el modo local. Se implementó una partida en memoria que comparte tablero y motor con el puzzle. Primero revisar local, luego online. [Diseño y código vigente](10_multijugador_local_un_dispositivo.md).
 
 Revisión: 25 de octubre de 2026, tras bdda951. Se conserva la arquitectura para **Android, LAN host/cliente, puzzle y online Lichess**. Ya hay código de acceso Supabase, menú y puzzle con tablero/guardado; faltan validación local y funciones restantes. Ver [revisión del merge](08_revision_merge_bdda951.md). El informe 07 describe el estado anterior.

@@ -1,5 +1,7 @@
 # 04 · Plan de trabajo por partes revisables
 
+> Actualización vigente del 26-10: **ambos modos locales**, Frente a frente y Local Wi-Fi, antes de online. Selector y paleta de mockups, transporte anfitrión/invitado, historial y retos compartidos implementados. Las cancelaciones LAN de revisiones anteriores son históricas. [Plan por partes y límites de verificación](11_modos_locales_wifi_y_estilo.md).
+
 > Cambio de alcance autorizado el 25-10: **local frente a frente en un solo dispositivo; después online**. Se reemplazan las tareas LAN de B09–B11 por tablero compartido, partida en memoria y retos orientados. Las fichas LAN que siguen se conservan como antecedentes, no como tareas a implementar. [Plan vigente, funciones y partes para commit](10_multijugador_local_un_dispositivo.md).
 
 Revisión: 25 de octubre de 2026, posterior al merge **bdda951**. Se mantiene la secuencia de catorce bloques, reconociendo acceso y puzzle ya implementados en código por Juan Pablo Molina. No repetir esas implementaciones ni confundirlas con validación completa. Estado vigente y hallazgos: [revisión del merge](08_revision_merge_bdda951.md). El informe 07 queda como revisión histórica previa.
@@ -26,9 +28,9 @@ La base de 0b0c221 y las funciones integradas en bdda951 se conservan. En Multij
 | B06 | Catálogo y formulario de ejercicios | Núcleo académico/producto o preparación | Pendiente |
 | B07 | API del puzzle, tarjeta y detalle | Código API/FutureBuilder/constructor/Hero/implícita presente; validar | En progreso |
 | B08 | Resolver puzzle y confirmar ejercicio | Resolución/guardado/resumen presentes; ejercicio y Listo pendientes | En progreso |
-| B09 | Base local: tablero reutilizado, motor y fases en memoria | Código y pruebas incorporados; sin transporte LAN | En progreso |
-| B10 | Partida frente a frente en un solo dispositivo | Pantalla y turnos probados; falta revisión en dispositivo físico | En progreso |
-| B11 | Reto, aceptar/Listo o rechazar/shot desde cada lado | Flujo implementado con catálogo inicial; catálogo privado posterior | En progreso |
+| B09 | Selector, base compartida y transporte Local Wi-Fi | Sala anfitrión/invitado y sockets reales probados en loopback; falta red Android real | En progreso |
+| B10 | Frente a frente y Wi-Fi con revisión de jugadas | Mismos tablero e historial que puzzle; validación física pendiente | En progreso |
+| B11 | Retos en ambos modos locales | Panel compartido, selección y aceptación/rechazo sincronizados; catálogo privado posterior | En progreso |
 | B12 | Autorización y acceso Lichess online | Online explícito de la propuesta; prioridad pendiente | Pendiente |
 | B13 | Partida online y ejercicios informativos | Online explícito de la propuesta; prioridad pendiente | Pendiente |
 | B14 | Verificación y entrega del lunes | Núcleo académico/producto o preparación | Pendiente |

@@ -1,6 +1,6 @@
 # 02 · Requisitos y alcance de ChessErcise
 
-Revisión vigente: 25 de octubre de 2026. El usuario reemplazó LAN por local en un dispositivo y confirmó trabajar primero en local, después online. Las referencias a LAN en fuentes originales son antecedentes. Puzzle y requisitos académicos permanecen.
+Revisión vigente: 26 de octubre de 2026. El usuario solicita conservar Frente a frente y recuperar Local Wi-Fi como segunda opción. Primero ambos modos locales; después online. [Diseño y alcance actuales](11_modos_locales_wifi_y_estilo.md). Las revisiones anteriores que descartaban LAN quedan como antecedentes.
 
 Tras bdda951 se incorporaron acceso Supabase y puzzle con tablero/progreso/resumen. Posteriormente se implementó local frente a frente, se reutilizó el tablero y pasaron análisis y 38 pruebas. CRUD privado, rutina del puzzle y online siguen pendientes. [Alcance vigente y límites](10_multijugador_local_un_dispositivo.md); [revisión histórica del merge](08_revision_merge_bdda951.md).
 
@@ -26,7 +26,7 @@ El objetivo es jugar partidas válidas, asociar pérdidas de piezas a ejercicios
 
 | ID | Estado | Decisión y efecto |
 |---|---|---|
-| D01 | Sustituida por el usuario el 25-10 | Dos personas en un solo celular/tablet, frente a frente y sin mover el dispositivo. Reemplaza host/cliente Wi-Fi. Primero local y después online; ver documento 10 |
+| D01 | Ampliada por el usuario el 26-10 | Selector con Frente a frente en un dispositivo y Local Wi-Fi entre dos dispositivos de la misma red. Mantener ambos; después online. Ver documento 11 |
 | D02 | Confirmada | Android como entrega; sin iOS. Navegador autorizado posteriormente como ejecución de desarrollo sin emulador |
 | D03 | Criterio confirmado; validación técnica pendiente | Escoger versiones compatibles y la solución más simple. Revisar chessground + dartchess y web_socket_channel, ya propuestos por el equipo. No confundir documentación compatible con resolución/build comprobados |
 | D04 | Confirmada y ampliada el 25-10 | El capturador elige reto; el retado acepta y marca «Listo» o rechaza y ve animación «Tomar shot», desde su perspectiva. Sin verificación física avanzada |
@@ -41,7 +41,7 @@ P0-exp = funcionalidad core explícita del documento; P0-acad = mínimo del curs
 
 | ID | Función | Prioridad/origen | Dificultad | Dependencias | Bloque vigente |
 |---|---|---|---|---|---|
-| RF01 | Partida local en un dispositivo, con dos perspectivas fijas | Cambio explícito del usuario, D01 | Media | Tablero compartido, motor y zonas orientadas | B03, B09–B11 |
+| RF01 | Dos modos locales: Frente a frente con perspectivas fijas y Local Wi-Fi anfitrión/invitado | Cambio explícito del usuario, D01 | Media/alta | Selector, tablero compartido, motor y transporte LAN | B03, B09–B11 |
 | RF02 | Captura permite al oponente elegir ejercicio según valor de pieza | P0-exp, propuesta §6; PDF pp. 10/12 | Media/alta | Catálogo, captura, sincronización | B06, B10–B11 |
 | RF03 | Aceptar/rechazar reto desde cada lado; animación Tomar shot al rechazar | Cambio explícito del usuario; PDF p. 13 como antecedente | Media | Captura y fases locales | B11 |
 | RF04 | Confirmar «Listo» sin comprobación física | Confirmado por usuario, D04 | Baja en UI; media en sincronización | Desafío pendiente y participante correcto | B08, B11 |

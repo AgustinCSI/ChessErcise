@@ -13,13 +13,28 @@ import 'package:flutter_test/flutter_test.dart';
 
 // Los códecs de imagen usan el reloj real del motor, no el reloj falso de pump.
 Future<void> cargarIntro(WidgetTester tester) async {
-  for (var i = 0; i < 100 && tester.binding.transientCallbackCount == 0; i++) {
+  bool introAnimando() => tester
+      .widgetList<AnimatedBuilder>(
+        find.descendant(
+          of: find.byType(IntroScreen),
+          matching: find.byType(AnimatedBuilder),
+        ),
+      )
+      .any(
+        (widget) =>
+            widget.animation is AnimationController &&
+            (widget.animation as AnimationController).isAnimating,
+      );
+
+  // Otras animaciones del perfil pueden empezar antes de cargar los PNG.
+  // Esperar la animación de la intro, no cualquier callback de la aplicación.
+  for (var i = 0; i < 250 && !introAnimando(); i++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 20)),
     );
     await tester.pump();
   }
-  expect(tester.binding.transientCallbackCount, greaterThan(0));
+  expect(introAnimando(), isTrue);
   await tester.pump();
 }
 

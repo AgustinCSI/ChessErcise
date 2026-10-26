@@ -98,35 +98,54 @@ class _PartidaLocalScreenState extends State<PartidaLocalScreen> {
                     espacio.maxWidth - 16,
                     espacio.maxHeight * .52,
                   );
-                  return Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            width: size,
-                            child: _panel(Side.black),
+                  // Usar todo el ancho evita que RotatedBox deje el juego
+                  // pegado a un borde cuando el tablero es más pequeño.
+                  return SizedBox(
+                    width: espacio.maxWidth,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              width: size,
+                              child: _panel(Side.black),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        TableroInteractivo(
-                          size: size,
-                          posicion: _partida.posicion,
-                          jugador: _partida.posicion.turn,
-                          orientacion: Side.white,
-                          frenteAFrente: true,
-                          ultimaJugada: _partida.ultimaJugada,
-                          puedeMover: _partida.puedeMover,
-                          onMove: _partida.jugar,
-                        ),
-                        const SizedBox(height: 8),
-                        Expanded(
-                          child: SizedBox(
-                            width: size,
-                            child: _panel(Side.white),
+                          const SizedBox(height: 8),
+                          Stack(
+                            children: [
+                              TableroInteractivo(
+                                size: size,
+                                posicion: _partida.posicion,
+                                jugador: _partida.posicion.turn,
+                                orientacion: Side.white,
+                                frenteAFrente: true,
+                                ultimaJugada: _partida.ultimaJugada,
+                                puedeMover: _partida.puedeMover,
+                                onMove: _partida.jugar,
+                              ),
+                              // El velo solo cubre el tablero; cada jugador
+                              // conserva su panel orientado y sus acciones.
+                              if (!_partida.puedeMover &&
+                                  _partida.fase != FaseLocal.finalizada)
+                                Positioned.fill(
+                                  child: ColoredBox(
+                                    key: const ValueKey('velo-reto-local'),
+                                    color: Colors.black.withValues(alpha: .58),
+                                  ),
+                                ),
+                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Expanded(
+                            child: SizedBox(
+                              width: size,
+                              child: _panel(Side.white),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },

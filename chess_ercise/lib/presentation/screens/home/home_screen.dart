@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../puzzles/daily_puzzle_screen.dart';
-import '../local/local_setup_screen.dart';
+import '../local/local_modes_screen.dart';
+import '../../widgets/tarjeta_modo.dart';
 
 // El modo local comparte dispositivo; online se implementará después.
 class HomeScreen extends StatelessWidget {
@@ -33,28 +34,33 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    FilledButton.icon(
-                      onPressed: () => Navigator.of(context).push(
+                    TarjetaModo(
+                      titulo: 'Puzzle diario',
+                      descripcion: 'Un nuevo desafío para entrenar tu mente.',
+                      onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (_) => const DailyPuzzleScreen(),
                         ),
                       ),
-                      icon: const Icon(Icons.extension_outlined),
-                      label: const Text('Puzzle diario'),
+                      icono: Icons.extension_outlined,
                     ),
                     const SizedBox(height: 12),
-                    OutlinedButton(
-                      onPressed: () => Navigator.of(context).push(
+                    TarjetaModo(
+                      titulo: 'Multijugador local',
+                      descripcion: 'Frente a frente o por la misma red Wi-Fi.',
+                      icono: Icons.people_alt_outlined,
+                      onTap: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
-                          builder: (_) => const LocalSetupScreen(),
+                          builder: (_) => const LocalModesScreen(),
                         ),
                       ),
-                      child: const Text('Multijugador local · Un dispositivo'),
                     ),
                     const SizedBox(height: 12),
-                    const OutlinedButton(
-                      onPressed: null,
-                      child: Text('Online con Lichess · Próximamente'),
+                    const TarjetaModo(
+                      titulo: 'Online con Lichess',
+                      descripcion:
+                          'Próximamente · Juega con tu cuenta Lichess.',
+                      icono: Icons.public,
                     ),
                   ],
                 ),
