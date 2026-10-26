@@ -10,6 +10,8 @@ import 'partida_local_controller.dart';
 
 // El anfitrión valida; el invitado reproduce comandos aceptados con el mismo motor.
 class PartidaLanController extends ChangeNotifier {
+  // v2 comparte las dos opciones sorteadas por el anfitrión en cada captura.
+  static const versionProtocolo = 2;
   PartidaLanController({LanTransporte? transporte})
     : _transporte = transporte ?? crearTransporteLan() {
     _transporte.onMensaje = _recibir;
@@ -112,7 +114,7 @@ class PartidaLanController extends ChangeNotifier {
     try {
       await _transporte.conectar(uri.host, uri.port, codigo);
       if (_disposed) return;
-      _enviar({'v': 1, 'tipo': 'hola', 'nombre': nombre});
+      _enviar({'v': versionProtocolo, 'tipo': 'hola', 'nombre': nombre});
       await _entrada!.future.timeout(const Duration(seconds: 12));
     } catch (_) {
       await _transporte.cerrar();
@@ -129,8 +131,9 @@ class PartidaLanController extends ChangeNotifier {
   bool _aplicar(
     PartidaLocalController juego,
     Side actor,
-    Map<String, dynamic> orden,
-  ) {
+    Map<String, dynamic> orden, {
+    bool reproducir = false,
+  }) {
     var cambio = false;
     void marcar() => cambio = true;
     juego.addListener(marcar);
@@ -139,7 +142,17 @@ class PartidaLanController extends ChangeNotifier {
         case 'mover':
           if (actor != juego.posicion.turn || orden['uci'] is! String) break;
           final move = Move.parse(orden['uci'] as String);
-          if (move != null) juego.jugar(move);
+          if (move != null) {
+            if (reproducir) {
+              final opciones = orden['opciones'];
+              if (opciones is! List || opciones.any((id) => id is! String)) {
+                break;
+              }
+              juego.jugar(move, opcionesReto: opciones.cast<String>());
+            } else {
+              juego.jugar(move);
+            }
+          }
         case 'elegir':
           if (orden['id'] is String) {
             juego.elegirReto(actor, orden['id'] as String);
@@ -157,6 +170,22 @@ class PartidaLanController extends ChangeNotifier {
     return cambio;
   }
 
+  bool _aceptarOrden(Map<String, dynamic> orden, Side actor) {
+    if (!_aplicar(_partida, actor, orden)) return false;
+    final tipo = orden['tipo'];
+    _registro.add({
+      'tipo': tipo,
+      'actor': actor == Side.white ? 'white' : 'black',
+      if (tipo == 'mover') ...{
+        'uci': orden['uci'],
+        'opciones': _partida.opciones.map((reto) => reto.id).toList(),
+      },
+      if (tipo == 'elegir') 'id': orden['id'],
+      if (tipo == 'responder') 'acepta': orden['acepta'],
+    });
+    return true;
+  }
+
   void _orden(Map<String, dynamic> orden) {
     if (_disposed || !conectado || pendiente) {
       return;
@@ -166,14 +195,18 @@ class PartidaLanController extends ChangeNotifier {
       return;
     }
     if (anfitrion) {
-      if (_aplicar(_partida, Side.white, orden)) {
-        _registro.add({...orden, 'actor': 'white'});
+      if (_aceptarOrden(orden, Side.white)) {
         _publicar();
         notifyListeners();
       }
     } else {
       pendiente = true;
-      _enviar({'v': 1, 'tipo': 'orden', 'revision': revision, 'orden': orden});
+      _enviar({
+        'v': versionProtocolo,
+        'tipo': 'orden',
+        'revision': revision,
+        'orden': orden,
+      });
       _espera = Timer(
         const Duration(seconds: 8),
         () => _fallar('El anfitrión no respondió. Sal y vuelve a conectar.'),
@@ -183,7 +216,7 @@ class PartidaLanController extends ChangeNotifier {
   }
 
   void _publicar() => _enviar({
-    'v': 1,
+    'v': versionProtocolo,
     'tipo': 'estado',
     'revision': revision,
     'nombre': nombre,
@@ -194,7 +227,8 @@ class PartidaLanController extends ChangeNotifier {
     if (_disposed || _terminal) return;
     try {
       final mensaje = jsonDecode(raw);
-      if (mensaje is! Map<String, dynamic> || mensaje['v'] != 1) {
+      if (mensaje is! Map<String, dynamic> ||
+          mensaje['v'] != versionProtocolo) {
         throw const FormatException();
       }
       if (anfitrion) {
@@ -212,8 +246,7 @@ class PartidaLanController extends ChangeNotifier {
         if (mensaje['revision'] == revision &&
             orden is Map<String, dynamic> &&
             _registro.length < 1000 &&
-            _aplicar(_partida, Side.black, orden)) {
-          _registro.add({...orden, 'actor': 'black'});
+            _aceptarOrden(orden, Side.black)) {
           notifyListeners();
         }
         _publicar(); // También corrige al invitado ante una orden ilegal/atrasada.
@@ -239,6 +272,7 @@ class PartidaLanController extends ChangeNotifier {
                   juego,
                   dato['actor'] == 'white' ? Side.white : Side.black,
                   dato,
+                  reproducir: true,
                 )) {
               throw const FormatException();
             }

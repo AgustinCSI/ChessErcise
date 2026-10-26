@@ -137,7 +137,8 @@ void main() {
     );
     expect(tablero.controller.game.playerSide, PlayerSide.none);
     expect(find.text('Aceptar reto'), findsNothing);
-    final elegir = find.text('Sentadillas · 1 repetición');
+    final opcion = partida.opciones.first;
+    final elegir = find.text('${opcion.titulo} · ${opcion.indicacion}');
     await tester.ensureVisible(elegir);
     await tester.tap(elegir);
     await tester.pumpAndSettle();

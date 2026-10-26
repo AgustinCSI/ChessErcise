@@ -1,5 +1,9 @@
 # ChessErcise · Flutter Android
 
+## Ejercicios disponibles
+
+El catálogo contiene nueve ejercicios. En cada captura se sortean **solo dos opciones distintas**, que se conservan durante el reto. En Wi-Fi, el anfitrión comparte el mismo par con el invitado; ambos dispositivos deben usar el APK actualizado (protocolo 2). [Ver lista completa y cantidades](../docs/13_catalogo_y_retos_aleatorios.md).
+
 ## Elegir un modo local
 
 Inicio → **Multijugador local** abre dos cuadros: **Frente a frente** (un dispositivo) y **Local Wi-Fi** (dos Android en la misma red). Se conserva el primero y se recupera el segundo por solicitud del equipo.

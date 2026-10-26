@@ -19,9 +19,9 @@ class TransporteGuion extends LanTransporte {
   TransporteGuion({this.reto = false});
   final bool reto;
   final comandos = <Map<String, dynamic>>[
-    {'tipo': 'mover', 'uci': 'e2e4', 'actor': 'white'},
-    {'tipo': 'mover', 'uci': 'e7e5', 'actor': 'black'},
-    {'tipo': 'mover', 'uci': 'g1f3', 'actor': 'white'},
+    {'tipo': 'mover', 'uci': 'e2e4', 'actor': 'white', 'opciones': <String>[]},
+    {'tipo': 'mover', 'uci': 'e7e5', 'actor': 'black', 'opciones': <String>[]},
+    {'tipo': 'mover', 'uci': 'g1f3', 'actor': 'white', 'opciones': <String>[]},
   ];
   @override
   bool get disponible => true;
@@ -40,9 +40,24 @@ class TransporteGuion extends LanTransporte {
       comandos
         ..clear()
         ..addAll([
-          {'tipo': 'mover', 'uci': 'e2e4', 'actor': 'white'},
-          {'tipo': 'mover', 'uci': 'd7d5', 'actor': 'black'},
-          {'tipo': 'mover', 'uci': 'e4d5', 'actor': 'white'},
+          {
+            'tipo': 'mover',
+            'uci': 'e2e4',
+            'actor': 'white',
+            'opciones': <String>[],
+          },
+          {
+            'tipo': 'mover',
+            'uci': 'd7d5',
+            'actor': 'black',
+            'opciones': <String>[],
+          },
+          {
+            'tipo': 'mover',
+            'uci': 'e4d5',
+            'actor': 'white',
+            'opciones': ['sentadillas-1', 'flexiones-1'],
+          },
           {'tipo': 'elegir', 'id': 'sentadillas-1', 'actor': 'white'},
         ]);
     } else if (mensaje['tipo'] == 'orden') {
@@ -54,7 +69,7 @@ class TransporteGuion extends LanTransporte {
     scheduleMicrotask(
       () => onMensaje?.call(
         jsonEncode({
-          'v': 1,
+          'v': PartidaLanController.versionProtocolo,
           'tipo': 'estado',
           'nombre': 'Ana',
           'revision': comandos.length,

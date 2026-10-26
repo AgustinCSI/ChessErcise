@@ -1,5 +1,7 @@
 # 11 · Frente a frente, Local Wi-Fi y estilo de los mockups
 
+> Catálogo actualizado posteriormente el 26-10: nueve ejercicios y dos opciones aleatorias por captura, estables y compartidas por el anfitrión. Protocolo Wi-Fi 2; actualizar ambos dispositivos. [Lista, cantidades y funcionamiento](13_catalogo_y_retos_aleatorios.md). Sustituye el catálogo inicial descrito en las revisiones anteriores.
+
 > Ajuste visual posterior del 26-10: respuesta al reto con dos botones grandes e iguales, Rechazar rojo a la izquierda y Aceptar reto verde a la derecha. Texto oscuro y etiquetas con mayor contraste en el tema compartido. Se conserva el flujo de ambos modos; análisis y 62 pruebas correctos.
 
 Fecha: 26-10-2026. Nueva instrucción del usuario: conservar Frente a frente y recuperar, como **segunda opción**, los enfrentamientos entre dos dispositivos en la misma Wi-Fi. Ambos son modos locales. Online por Lichess permanece como integración posterior.

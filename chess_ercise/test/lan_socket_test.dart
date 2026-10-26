@@ -33,6 +33,10 @@ Future<void> iguales(
   );
   expect(invitado.partida.posicion.fen, host.partida.posicion.fen);
   expect(invitado.partida.fase, host.partida.fase);
+  expect(
+    invitado.partida.opciones.map((reto) => reto.id),
+    host.partida.opciones.map((reto) => reto.id),
+  );
 }
 
 void main() {
@@ -57,15 +61,20 @@ void main() {
       return (jsonDecode(mensajes.current as String) as Map)['revision'] as int;
     }
 
-    void ordenar(int revision) => socket.add(
-      jsonEncode({
-        'v': 1,
-        'tipo': 'orden',
-        'revision': revision,
-        'orden': {'tipo': 'mover', 'uci': 'd7d5'},
-      }),
-    );
-    socket.add(jsonEncode({'v': 1, 'tipo': 'hola', 'nombre': 'Luis'}));
+    void ordenar(int revision, {String uci = 'd7d5', List<String>? opciones}) =>
+        socket.add(
+          jsonEncode({
+            'v': 2,
+            'tipo': 'orden',
+            'revision': revision,
+            'orden': {
+              'tipo': 'mover',
+              'uci': uci,
+              'opciones': ?opciones,
+            },
+          }),
+        );
+    socket.add(jsonEncode({'v': 2, 'tipo': 'hola', 'nombre': 'Luis'}));
     expect(await revisionRecibida(), 0);
     host.jugar(Move.parse('e2e4')!);
     expect(await revisionRecibida(), 1);
@@ -78,7 +87,44 @@ void main() {
     ordenar(1);
     expect(await revisionRecibida(), 2);
     expect(host.partida.posicion.fen, fen);
+    host.jugar(Move.parse('g1f3')!);
+    expect(await revisionRecibida(), 3);
+    ordenar(3, uci: 'd5e4', opciones: ['inventado-1', 'inventado-2']);
+    expect(await revisionRecibida(), 4);
+    expect(host.partida.opciones.length, 2);
+    expect(
+      host.partida.opciones.any((reto) => reto.id.startsWith('inventado')),
+      isFalse,
+    );
+    final paquete = jsonDecode(mensajes.current as String) as Map;
+    expect(
+      (paquete['comandos'] as List).last['opciones'],
+      host.partida.opciones.map((reto) => reto.id).toList(),
+    );
   });
+
+  test(
+    'El protocolo anterior se rechaza sin iniciar una partida distinta',
+    () async {
+      final host = PartidaLanController();
+      await host.abrir('Ana', direccion: '127.0.0.1');
+      final socket = await io.WebSocket.connect(
+        'ws://127.0.0.1:${host.puerto}/partida?sala=${host.codigo}',
+      );
+      addTearDown(() async {
+        await socket.close();
+        await host.cerrar();
+        host.dispose();
+      });
+      socket.add(
+        jsonEncode({'v': 1, 'tipo': 'hola', 'nombre': 'Cliente anterior'}),
+      );
+      await esperar(host, () => host.error != null);
+      expect(host.conectado, isFalse);
+      expect(host.revision, 0);
+      expect(host.error, contains('compatibles'));
+    },
+  );
 
   test(
     'WebSocket real: turnos, capturas, retos y confirmaciones coinciden',
