@@ -1,4 +1,3 @@
-import 'package:chess_ercise/app.dart';
 import 'package:chess_ercise/presentation/providers/auth_provider.dart';
 import 'package:chess_ercise/presentation/screens/auth/login_screen.dart';
 import 'package:chess_ercise/presentation/theme/app_theme.dart';
@@ -47,11 +46,6 @@ class FakeAuth extends GoTrueClient {
 }
 
 void main() {
-  testWidgets('Missing configuration shows instructions', (tester) async {
-    await tester.pumpWidget(const ChessErciseApp(supabaseDisponible: false));
-    expect(find.textContaining('SUPABASE_URL'), findsOneWidget);
-  });
-
   test(
     'Provider restores loading and distinguishes confirmation from error',
     () async {

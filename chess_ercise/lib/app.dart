@@ -3,22 +3,64 @@ import 'package:provider/provider.dart';
 
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/screens/auth/auth_gate.dart';
+import 'presentation/screens/intro/intro_screen.dart';
 import 'presentation/theme/app_theme.dart';
 
-class ChessErciseApp extends StatelessWidget {
-  const ChessErciseApp({super.key, required this.supabaseDisponible});
+class ChessErciseApp extends StatefulWidget {
+  const ChessErciseApp({
+    super.key,
+    this.supabaseDisponible,
+    this.inicializacion,
+  }) : assert(supabaseDisponible != null || inicializacion != null);
 
-  final bool supabaseDisponible;
+  final bool? supabaseDisponible;
+  final Future<bool>? inicializacion;
 
   @override
-  Widget build(BuildContext context) {
-    final app = MaterialApp(
-      title: 'ChessErcise',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.claro,
-      home: supabaseDisponible
-          ? const AuthGate()
+  State<ChessErciseApp> createState() => _ChessErciseAppState();
+}
+
+class _ChessErciseAppState extends State<ChessErciseApp> {
+  bool? _disponible;
+  bool _introTerminada = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _disponible = widget.supabaseDisponible;
+    if (_disponible == null) {
+      widget.inicializacion!.then(
+        _terminarInicio,
+        onError: (_) => _terminarInicio(false),
+      );
+    }
+  }
+
+  void _terminarInicio(bool disponible) {
+    if (mounted) setState(() => _disponible = disponible);
+  }
+
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'ChessErcise',
+    debugShowCheckedModeBanner: false,
+    theme: AppTheme.claro,
+    home: AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      child: !_introTerminada || _disponible == null
+          ? IntroScreen(
+              key: const ValueKey('intro'),
+              esperando: _introTerminada && _disponible == null,
+              onFinished: () => setState(() => _introTerminada = true),
+            )
+          : _disponible!
+          ? ChangeNotifierProvider(
+              key: const ValueKey('auth'),
+              create: (_) => AuthProvider(),
+              child: const AuthGate(),
+            )
           : const Scaffold(
+              key: ValueKey('configuracion'),
               body: SafeArea(
                 child: Center(
                   child: Padding(
@@ -34,8 +76,6 @@ class ChessErciseApp extends StatelessWidget {
                 ),
               ),
             ),
-    );
-    if (!supabaseDisponible) return app;
-    return ChangeNotifierProvider(create: (_) => AuthProvider(), child: app);
-  }
+    ),
+  );
 }
