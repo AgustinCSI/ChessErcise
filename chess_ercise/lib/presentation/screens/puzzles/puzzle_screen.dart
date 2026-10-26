@@ -10,6 +10,7 @@ import '../../widgets/tablero_widget.dart';
 import '../../widgets/puzzle_toolbar.dart';
 import '../../widgets/player_info.dart';
 import '../../widgets/puzzle_moves.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/puzzle_status.dart';
 import '../../providers/puzzles_provider.dart';
 import '../../widgets/puzzle_save_status.dart';
@@ -88,28 +89,76 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   Widget _tablero() => LayoutBuilder(
     builder: (context, constraints) {
       // Tablero y jugador forman una sola unidad, sin espacios flexibles entre sí.
-      const pie = 112.0;
+      const pie = 96.0;
       final size = math.max(
         0.0,
         math.min(constraints.maxWidth, constraints.maxHeight - pie),
       );
-      return Center(
+      return Align(
+        alignment: Alignment.topCenter,
         child: SizedBox(
           width: math.min(constraints.maxWidth, math.max(size, 200)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              PuzzleMoves(controller: _controller),
-              const SizedBox(height: 8),
               TableroWidget(puzzle: _controller, size: size),
               const SizedBox(height: 8),
               const SizedBox(height: 48, child: PlayerInfo()),
+              const SizedBox(height: 8),
+              Row(
+                key: const ValueKey('puzzle-counters'),
+                children: [
+                  Expanded(
+                    child: _contador(
+                      'Errores: ${_controller.errores}',
+                      Icons.close,
+                      AppTheme.colorErrores,
+                      AppTheme.textoErrores,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _contador(
+                      'Pistas: ${_controller.pistasUsadas}',
+                      Icons.lightbulb_outline,
+                      AppTheme.colorPistas,
+                      AppTheme.textoPistas,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       );
     },
   );
+
+  Widget _contador(String texto, IconData icono, Color fondo, Color color) =>
+      Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: fondo,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icono, size: 16, color: color),
+            const SizedBox(width: 4),
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  texto,
+                  style: TextStyle(color: color, fontSize: 12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
@@ -162,7 +211,15 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                     constraints: const BoxConstraints(maxWidth: 1120),
                     child: Row(
                       children: [
-                        Expanded(child: _tablero()),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              PuzzleMoves(controller: _controller),
+                              const SizedBox(height: 8),
+                              Expanded(child: _tablero()),
+                            ],
+                          ),
+                        ),
                         const SizedBox(width: 24),
                         SizedBox(
                           width: 280,
@@ -197,9 +254,11 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _encabezado(context),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       _estado(context),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 4),
+                      PuzzleMoves(controller: _controller),
+                      const SizedBox(height: 8),
                       Expanded(child: _tablero()),
                     ],
                   ),

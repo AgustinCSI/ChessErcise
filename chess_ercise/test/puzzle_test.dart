@@ -257,6 +257,63 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('Move strip keeps fixed bounds and scrolls through a long line', (
+    tester,
+  ) async {
+    final moves = <Move>[
+      for (var i = 0; i < 3; i++) ...[
+        Move.parse('g1f3')!,
+        Move.parse('g8f6')!,
+        Move.parse('f3g1')!,
+        Move.parse('f6g8')!,
+      ],
+      Move.parse('g1f3')!,
+    ];
+    final controller = PuzzleController(
+      PuzzleDiario(
+        id: 'long',
+        rating: 1000,
+        posicionInicial: Chess.initial,
+        solucion: moves,
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 260,
+              child: ListenableBuilder(
+                listenable: controller,
+                builder: (_, _) => PuzzleMoves(controller: controller),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final emptyBounds = tester.getRect(find.byType(PuzzleMoves));
+    expect(emptyBounds.width, 260);
+    expect(emptyBounds.height, 48);
+    controller.rendirse();
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byType(PuzzleMoves)), emptyBounds);
+    final scroll = tester.state<ScrollableState>(find.byType(Scrollable));
+    expect(scroll.position.maxScrollExtent, greaterThan(0));
+    await tester.drag(find.byType(PuzzleMoves), const Offset(-400, 0));
+    await tester.pumpAndSettle();
+    expect(scroll.position.pixels, greaterThan(0));
+    controller.irA(controller.totalJugadas);
+    await tester.pumpAndSettle();
+    final selected = tester.getRect(find.byTooltip('7. Nf3'));
+    expect(selected.left, greaterThanOrEqualTo(emptyBounds.left));
+    expect(selected.right, lessThanOrEqualTo(emptyBounds.right));
+    await tester.pumpWidget(const SizedBox.shrink());
+    controller.dispose();
+  });
+
   testWidgets('Review and completion messages keep board and player in place', (
     tester,
   ) async {
@@ -323,6 +380,16 @@ void main() {
         expect(find.byType(LinearProgressIndicator), findsNothing);
         expect(find.textContaining('Jugada 0/'), findsNothing);
         final player = tester.getRect(find.byType(PlayerInfo));
+        final counters = tester.getRect(
+          find.byKey(const ValueKey('puzzle-counters')),
+        );
+        expect(counters.top, closeTo(player.bottom + 8, 0.01));
+        expect(find.text('Errores: 0'), findsOneWidget);
+        expect(find.text('Pistas: 0'), findsOneWidget);
+        expect(
+          counters.bottom,
+          lessThanOrEqualTo(tester.getRect(find.byType(PuzzleToolbar)).top),
+        );
         final board = tester.getRect(find.byType(TableroWidget));
         final toolbar = tester.getRect(find.byType(PuzzleToolbar));
         expect(find.byTooltip('Volver a intentarlo'), findsNothing);
@@ -330,6 +397,11 @@ void main() {
         expect(player.top, closeTo(board.bottom + 8, 0.01));
         expect(find.text('Tu nombre'), findsOneWidget);
         if (size.width < 600) {
+          expect(
+            strip.top,
+            closeTo(tester.getRect(find.byType(PuzzleStatus)).bottom + 4, 0.01),
+          );
+          expect(strip.width, closeTo(size.width - 24, 0.01));
           expect(
             tester.getRect(find.byType(PuzzleStatus)).bottom,
             lessThanOrEqualTo(board.top),

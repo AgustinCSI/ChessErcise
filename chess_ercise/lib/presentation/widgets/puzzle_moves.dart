@@ -3,6 +3,7 @@ import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
 
 import '../../logic/puzzle_controller.dart';
+import '../theme/app_theme.dart';
 
 class PuzzleMoves extends StatefulWidget {
   const PuzzleMoves({super.key, required this.controller});
@@ -63,8 +64,14 @@ class _PuzzleMovesState extends State<PuzzleMoves> {
   @override
   Widget build(BuildContext context) {
     final moves = widget.controller.historial;
-    return SizedBox(
+    return Container(
       height: 48,
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppTheme.colorTiraJugadas,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
