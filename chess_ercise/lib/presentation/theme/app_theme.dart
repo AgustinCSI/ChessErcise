@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 // Cambiar esta paleta modifica todas las pantallas que usan el tema.
 class AppTheme {
+  static const colorIntro = Color(0xFFF7A8B5);
   static const colorPrincipal = Color(0xFFAD3565);
   static const colorFondo = Color.fromARGB(255, 237, 206, 215);
 
