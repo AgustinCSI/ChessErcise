@@ -1,4 +1,8 @@
+import 'dart:io' as io;
+
 import 'package:chess_ercise/logic/partida_local_controller.dart';
+import 'package:chess_ercise/models/perfil.dart';
+import 'package:chess_ercise/presentation/providers/perfil_provider.dart';
 import 'package:chess_ercise/presentation/screens/local/local_setup_screen.dart';
 import 'package:chess_ercise/presentation/screens/local/partida_local_screen.dart';
 import 'package:chess_ercise/presentation/theme/app_theme.dart';
@@ -8,6 +12,7 @@ import 'package:chessground/chessground.dart';
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 void mover(PartidaLocalController partida, List<String> jugadas) {
   for (final uci in jugadas) {
@@ -28,6 +33,54 @@ Future<void> avanzarInterfaz(WidgetTester tester) async {
 }
 
 void main() {
+  for (final nombres in [
+    ('Cuenta', 'Invitado', 1),
+    (' cuenta ', 'CUENTA', 2),
+    ('Invitado 1', 'Invitado 2', 0),
+  ]) {
+    testWidgets('Foto de la sesion en ${nombres.$3} paneles coincidentes', (
+      tester,
+    ) async {
+      final perfil = PerfilProvider(userId: 'sesion')
+        ..perfil = Perfil(
+          id: 'sesion',
+          username: 'Cuenta',
+          fechaNacimiento: DateTime(2000),
+          genero: 'prefiero_no_decir',
+        )
+        ..fotoBytes = io.File('assets/intro_screen/PiezaRey.png')
+            .readAsBytesSync();
+      addTearDown(perfil.dispose);
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: perfil,
+          child: MaterialApp(
+            theme: AppTheme.claro,
+            home: PartidaLocalScreen(
+              nombreBlancas: nombres.$1,
+              nombreNegras: nombres.$2,
+            ),
+          ),
+        ),
+      );
+      await avanzarInterfaz(tester);
+      final avatares = tester.widgetList<CircleAvatar>(
+        find.byType(CircleAvatar),
+      );
+      expect(
+        avatares
+            .where((avatar) => avatar.backgroundImage is MemoryImage)
+            .length,
+        nombres.$3,
+      );
+      expect(
+        avatares.where((avatar) => avatar.backgroundImage == null).length,
+        2 - nombres.$3,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   testWidgets('Toques de ambos jugadores mueven sobre el tablero fijo', (
     tester,
   ) async {

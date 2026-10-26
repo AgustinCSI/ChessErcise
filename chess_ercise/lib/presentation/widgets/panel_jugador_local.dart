@@ -31,6 +31,7 @@ class PanelJugadorLocal extends StatelessWidget {
     this.textoReinicio = 'Nueva partida',
     this.soloLectura = false,
     this.mensajeEstado,
+    this.imagen,
   });
 
   final PartidaLocalController partida;
@@ -47,6 +48,7 @@ class PanelJugadorLocal extends StatelessWidget {
   // Wi-Fi muestra la ficha rival sin permitir actuar en su nombre.
   final bool soloLectura;
   final String? mensajeEstado;
+  final ImageProvider? imagen;
 
   String get _color => lado == Side.white ? 'Blancas' : 'Negras';
 
@@ -310,6 +312,7 @@ class PanelJugadorLocal extends StatelessWidget {
                   Expanded(
                     child: PlayerInfo(
                       nombre: '$nombre · $_color',
+                      imagen: imagen,
                       estiloNombre: _textoPartida,
                     ),
                   ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../widgets/tarjeta_modo.dart';
 import 'local_setup_screen.dart';
@@ -39,7 +40,9 @@ class LocalModesScreen extends StatelessWidget {
               const SizedBox(height: 20),
               TarjetaModo(
                 titulo: 'Local Wi-Fi',
-                descripcion: 'Dos dispositivos en la misma red. Crea una sala o únete a la de tu rival.',
+                descripcion: kIsWeb
+                    ? 'Dos navegadores con Internet. Crea una sala y comparte el código.'
+                    : 'Dos dispositivos en la misma red. Crea una sala o únete a la de tu rival.',
                 icono: Icons.wifi,
                 onTap: () => Navigator.push(
                   context,

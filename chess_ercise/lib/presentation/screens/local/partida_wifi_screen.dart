@@ -223,9 +223,21 @@ class _PartidaWifiScreenState extends State<PartidaWifiScreen> {
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           _estado(),
-                          const Text(
-                            'Comparte un acceso de la red Wi-Fi con tu rival:',
+                          Text(
+                            _lan.usaCodigo
+                                ? 'Comparte este código con el otro navegador:'
+                                : 'Comparte un acceso de la red Wi-Fi con tu rival:',
                           ),
+                          if (_lan.usaCodigo)
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: SelectableText(
+                                _lan.codigo,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineLarge,
+                              ),
+                            ),
                           for (final ip in _lan.direcciones)
                             Padding(
                               padding: const EdgeInsets.all(8),
@@ -234,8 +246,10 @@ class _PartidaWifiScreenState extends State<PartidaWifiScreen> {
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                             ),
-                          const Text(
-                            'Ambos dispositivos deben estar en la misma red. Usa la dirección de tu Wi-Fi si aparecen varias.',
+                          Text(
+                            _lan.usaCodigo
+                                ? 'Ambos jugadores deben abrir la versión web y tener conexión a Internet.'
+                                : 'Ambos dispositivos deben estar en la misma red. Usa la dirección de tu Wi-Fi si aparecen varias.',
                           ),
                         ],
                       ),

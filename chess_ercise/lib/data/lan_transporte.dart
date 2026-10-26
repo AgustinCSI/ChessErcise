@@ -1,10 +1,12 @@
 import 'lan_transporte_stub.dart'
     if (dart.library.io) 'lan_transporte_io.dart'
+    if (dart.library.js_interop) 'lan_transporte_realtime.dart'
     as plataforma;
 
-// El navegador puede mostrar el lobby; alojar sockets requiere Android/nativo.
+// Android/nativo utiliza sockets locales; la web comparte mensajes por Realtime.
 abstract class LanTransporte {
   bool get disponible;
+  bool get usaCodigo => false;
   void Function(String)? onMensaje;
   void Function()? onCerrar;
   void Function(String)? onError;

@@ -58,7 +58,9 @@ class _WifiLobbyScreenState extends State<WifiLobbyScreen> {
     } catch (_) {
       if (mounted) {
         setState(
-          () => _error = 'No se pudo conectar. Comprueba la misma Wi-Fi y el acceso de la sala.',
+          () => _error = kIsWeb
+              ? 'No se pudo conectar. Comprueba Internet y el código de una sala abierta en otro navegador.'
+              : 'No se pudo conectar. Comprueba la misma Wi-Fi y el acceso de la sala.',
         );
       }
     } finally {
@@ -84,7 +86,9 @@ class _WifiLobbyScreenState extends State<WifiLobbyScreen> {
                 const Icon(Icons.wifi, size: 48),
                 const SizedBox(height: 16),
                 Text(
-                  'Juntos en la misma red',
+                  kIsWeb
+                      ? 'Juntos desde el navegador'
+                      : 'Juntos en la misma red',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
@@ -97,7 +101,7 @@ class _WifiLobbyScreenState extends State<WifiLobbyScreen> {
                     child: Padding(
                       padding: EdgeInsets.all(16),
                       child: Text(
-                        'Para jugar por Wi-Fi abre la app en dos dispositivos Android conectados a la misma red. El navegador permite revisar esta pantalla; no puede alojar la sala local.',
+                        'En la web, ambos jugadores necesitan Internet. Abre la app en dos navegadores: una persona crea la sala y comparte el código de seis dígitos.',
                       ),
                     ),
                   ),
@@ -116,7 +120,7 @@ class _WifiLobbyScreenState extends State<WifiLobbyScreen> {
                   titulo: 'Crear sala',
                   descripcion: 'Comparte el acceso con tu rival.',
                   icono: Icons.add_circle_outline,
-                  onTap: _ocupado || kIsWeb ? null : () => _iniciar(false),
+                  onTap: _ocupado ? null : () => _iniciar(false),
                 ),
                 const SizedBox(height: 16),
                 TarjetaModo(
@@ -130,9 +134,11 @@ class _WifiLobbyScreenState extends State<WifiLobbyScreen> {
                   TextFormField(
                     controller: _acceso,
                     autocorrect: false,
-                    decoration: const InputDecoration(
-                      labelText: 'Acceso de la sala',
-                      hintText: '192.168.1.5:45000/123456',
+                    decoration: InputDecoration(
+                      labelText: kIsWeb
+                          ? 'Código de la sala'
+                          : 'Acceso de la sala',
+                      hintText: kIsWeb ? '123456' : '192.168.1.5:45000/123456',
                     ),
                     validator: (valor) =>
                         _unirse && (valor == null || valor.trim().isEmpty)
@@ -141,7 +147,7 @@ class _WifiLobbyScreenState extends State<WifiLobbyScreen> {
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: _ocupado || kIsWeb ? null : () => _iniciar(true),
+                    onPressed: _ocupado ? null : () => _iniciar(true),
                     child: const Text('Conectar'),
                   ),
                 ],

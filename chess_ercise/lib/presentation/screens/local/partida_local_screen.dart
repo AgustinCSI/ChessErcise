@@ -2,8 +2,10 @@ import 'dart:math' as math;
 
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../logic/partida_local_controller.dart';
+import '../../providers/perfil_provider.dart';
 import '../../widgets/panel_jugador_local.dart';
 import '../../widgets/tablero_interactivo.dart';
 
@@ -67,16 +69,27 @@ class _PartidaLocalScreenState extends State<PartidaLocalScreen> {
     });
   }
 
-  Widget _panel(Side lado) => RotatedBox(
-    quarterTurns: lado == Side.black ? 2 : 0,
-    child: PanelJugadorLocal(
-      partida: _partida,
-      lado: lado,
-      nombre: lado == Side.white ? widget.nombreBlancas : widget.nombreNegras,
-      onSalir: () => _salir(lado),
-      onReiniciar: _partida.reiniciar,
-    ),
-  );
+  Widget _panel(Side lado) {
+    final perfil = context.watch<PerfilProvider?>();
+    final nombre = lado == Side.white
+        ? widget.nombreBlancas
+        : widget.nombreNegras;
+    final coincide =
+        perfil?.perfil?.username.trim().toLowerCase() ==
+        nombre.trim().toLowerCase();
+    final foto = coincide ? perfil?.fotoBytes : null;
+    return RotatedBox(
+      quarterTurns: lado == Side.black ? 2 : 0,
+      child: PanelJugadorLocal(
+        partida: _partida,
+        lado: lado,
+        nombre: nombre,
+        imagen: foto == null ? null : MemoryImage(foto),
+        onSalir: () => _salir(lado),
+        onReiniciar: _partida.reiniciar,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) => PopScope(

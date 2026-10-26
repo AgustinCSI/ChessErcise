@@ -39,6 +39,7 @@ class PartidaLanController extends ChangeNotifier {
   List<String> direcciones = [];
 
   bool get disponible => _transporte.disponible;
+  bool get usaCodigo => _transporte.usaCodigo;
   PartidaLocalController get partida => _partida;
   Side get lado => anfitrion ? Side.white : Side.black;
   int get revision => _registro.length;
@@ -80,6 +81,27 @@ class PartidaLanController extends ChangeNotifier {
   Future<void> unirse(String usuario, String acceso) async {
     if (_iniciado) throw StateError('La sala ya fue iniciada');
     nombre = validarNombre(usuario);
+    if (usaCodigo) {
+      final accesoLimpio = acceso.trim();
+      if (!RegExp(r'^\d{6}$').hasMatch(accesoLimpio)) {
+        throw const FormatException(
+          'Introduce el código de seis dígitos de la sala.',
+        );
+      }
+      _iniciado = true;
+      codigo = accesoLimpio;
+      _entrada = Completer<void>();
+      try {
+        await _transporte.conectar('', 0, codigo);
+        if (_disposed) return;
+        _enviar({'v': versionProtocolo, 'tipo': 'hola', 'nombre': nombre});
+        await _entrada!.future.timeout(const Duration(seconds: 12));
+      } catch (_) {
+        await _transporte.cerrar();
+        rethrow;
+      }
+      return;
+    }
     final uri = Uri.tryParse('ws://${acceso.trim()}');
     final ip = uri?.host.split('.').map(int.tryParse).toList();
     if (uri == null ||

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// Datos provisionales: el perfil real podrá pasar nombre e imagen después.
+// Ficha compartida: cada pantalla proporciona el nombre y la foto disponibles.
 class PlayerInfo extends StatelessWidget {
   const PlayerInfo({
     super.key,
