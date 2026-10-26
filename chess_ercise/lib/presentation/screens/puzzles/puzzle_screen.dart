@@ -184,6 +184,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
       final contenido = _controller.finalizado && !_revisar
           ? PuzzleSummaryScreen(
               controller: _controller,
+              diario: widget.diario,
               onReview: () => setState(() => _revisar = true),
             )
           : _juego(context);

@@ -1,6 +1,6 @@
 # 13 · Catálogo de ejercicios y dos opciones aleatorias
 
-26-10-2026. El usuario amplía el catálogo a nueve ejercicios y pide que solo aparezcan dos opciones aleatorias en cada reto. Aplica a Frente a frente y Local Wi-Fi; la rutina del puzzle diario continúa pendiente.
+26-10-2026. El usuario amplía el catálogo a nueve ejercicios y pide que solo aparezcan dos opciones aleatorias en cada reto. Aplica a Frente a frente y Local Wi-Fi. El puzzle diario reutiliza después los ejercicios por repeticiones con su propia regla: [rutina del puzzle](16_rutina_puzzle_diario.md).
 
 ## Lista disponible
 

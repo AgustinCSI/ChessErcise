@@ -161,6 +161,7 @@ void main() {
     await tester.tap(find.text('Ver solución'));
     await tester.pumpAndSettle();
     expect(find.text('Te rendiste'), findsOneWidget);
+    await tester.ensureVisible(find.text('Revisar tablero'));
     await tester.tap(find.text('Revisar tablero'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Te rendiste.'), findsOneWidget);

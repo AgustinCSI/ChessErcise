@@ -20,11 +20,12 @@ PuzzleDiario puzzle() => PuzzleDiario.fromJson(
 class CountingService extends LichessPuzzlesService {
   int calls = 0;
   bool falla = false;
+  PuzzleDiario? respuesta;
   @override
   Future<PuzzleDiario> obtenerDiario({CancelToken? cancelToken}) async {
     calls++;
     if (falla) throw const FormatException();
-    return puzzle();
+    return respuesta ?? puzzle();
   }
 }
 
@@ -79,6 +80,87 @@ void main() {
       reopened.dispose();
     },
   );
+
+  test(
+    'Daily refresh expires within the same UTC day without resetting results',
+    () async {
+      var now = DateTime.utc(2026, 10, 26, 0, 1);
+      final service = CountingService();
+      final provider = PuzzlesProvider(
+        userId: 'A',
+        service: service,
+        ahora: () => now,
+      );
+      final previous = await provider.obtenerDiario();
+      await provider.guardar(
+        previous,
+        ProgresoPuzzle(indice: previous.solucion.length, errores: 2),
+      );
+      now = now.add(const Duration(minutes: 14));
+      await provider.obtenerDiario();
+      expect(service.calls, 1);
+      final json = previous.toJson();
+      (json['puzzle'] as Map<String, dynamic>)['id'] = 'new-daily';
+      service.respuesta = PuzzleDiario.fromJson(json);
+      now = now.add(const Duration(minutes: 1));
+      final current = await provider.obtenerDiario();
+      expect(service.calls, 2);
+      expect(current.id, 'new-daily');
+      expect(provider.progresoPara(current).indice, 0);
+      expect(provider.progresoPara(previous).errores, 2);
+      // Explicit refresh also reaches Lichess while the cache is still fresh.
+      await provider.obtenerDiario(actualizar: true);
+      expect(service.calls, 3);
+      provider.dispose();
+    },
+  );
+
+  test('Disk cache expiry does not slide forward on every restart', () async {
+    var now = DateTime.utc(2026, 10, 26, 4);
+    PuzzlesProvider create(CountingService service) =>
+        PuzzlesProvider(userId: 'A', service: service, ahora: () => now);
+    final first = create(CountingService());
+    await first.obtenerDiario();
+    first.dispose();
+    now = now.add(const Duration(minutes: 14));
+    final service = CountingService();
+    final reopened = create(service);
+    await reopened.obtenerDiario();
+    expect(service.calls, 0);
+    now = now.add(const Duration(minutes: 1));
+    await reopened.obtenerDiario();
+    expect(service.calls, 1);
+    reopened.dispose();
+  });
+
+  test('Legacy cache is revalidated and refresh failures can retry', () async {
+    final now = DateTime.utc(2026, 10, 26, 4);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'chessercise.v1.A.daily',
+      jsonEncode({'dia': '2026-10-26', 'puzzle': puzzle().toJson()}),
+    );
+    final service = CountingService()..falla = true;
+    final provider = PuzzlesProvider(
+      userId: 'A',
+      service: service,
+      ahora: () => now,
+    );
+    await expectLater(provider.obtenerDiario(), throwsFormatException);
+    expect(service.calls, 1);
+    service.falla = false;
+    await provider.obtenerDiario();
+    expect(service.calls, 2);
+    service.falla = true;
+    await expectLater(
+      provider.obtenerDiario(actualizar: true),
+      throwsFormatException,
+    );
+    service.falla = false;
+    await provider.obtenerDiario(actualizar: true);
+    expect(service.calls, 4);
+    provider.dispose();
+  });
 
   test(
     'Terminal result cannot be overwritten, including after cache day rollover',
@@ -138,12 +220,119 @@ void main() {
     expect(find.text('¡Puzzle resuelto!'), findsOneWidget);
     expect(find.text('Errores: 2'), findsOneWidget);
     expect(find.text('Pistas usadas: 1'), findsOneWidget);
+    expect(find.text('12 repeticiones en total'), findsOneWidget);
+    await tester.ensureVisible(find.text('Revisar tablero'));
     await tester.tap(find.text('Revisar tablero'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Volver a intentarlo'), findsNothing);
     await tester.tap(find.byTooltip('Ver resumen'));
     await tester.pumpAndSettle();
     expect(find.text('Resumen diario'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    provider.dispose();
+  });
+
+  test('Routine completion survives restart without changing the sealed result', () async {
+    final provider = PuzzlesProvider(userId: 'A', service: CountingService());
+    final loaded = await provider.obtenerDiario();
+    // An unfinished puzzle cannot acquire a routine.
+    await provider.guardarRutina(loaded, 'flexiones', completada: true);
+    expect(provider.progresoPara(loaded).rutinaCompletada, isFalse);
+    await provider.guardar(
+      loaded,
+      ProgresoPuzzle(indice: loaded.solucion.length, errores: 2, pistas: {0}),
+    );
+    await provider.guardarRutina(loaded, 'plancha-frontal');
+    expect(provider.progresoPara(loaded).ejercicioId, 'sentadillas');
+    await provider.guardarRutina(loaded, 'flexiones', completada: true);
+    // Stale controller writes or another confirmation cannot reset the routine.
+    await provider.guardar(loaded, const ProgresoPuzzle());
+    await provider.guardarRutina(loaded, 'zancadas');
+    provider.dispose();
+    final reopened = PuzzlesProvider(userId: 'A', service: CountingService());
+    await reopened.obtenerDiario();
+    final saved = reopened.progresoPara(loaded);
+    expect(saved.indice, loaded.solucion.length);
+    expect(saved.errores, 2);
+    expect(saved.pistas, {0});
+    expect(saved.repeticiones, 12);
+    expect(saved.ejercicioId, 'flexiones');
+    expect(saved.rutinaCompletada, isTrue);
+    final other = PuzzlesProvider(userId: 'B', service: CountingService());
+    await other.obtenerDiario();
+    expect(other.progresoPara(loaded).rutinaCompletada, isFalse);
+    other.dispose();
+    reopened.dispose();
+  });
+
+  test(
+    'Old saves, zero penalties and surrender use the same repetition rule',
+    () async {
+      final loaded = puzzle();
+      final old = ProgresoPuzzle.fromJson({
+        'indice': loaded.solucion.length,
+        'errores': 0,
+        'pistas': <int>[],
+        'rendido': false,
+      }, loaded.solucion.length);
+      expect(old.repeticiones, 0);
+      expect(old.ejercicioId, 'sentadillas');
+      expect(old.rutinaCompletada, isFalse);
+      final provider = PuzzlesProvider(userId: 'A', service: CountingService());
+      await provider.obtenerDiario();
+      await provider.guardar(
+        loaded,
+        const ProgresoPuzzle(errores: 1, pistas: {0}, rendido: true),
+      );
+      await provider.guardarRutina(loaded, 'zancadas', completada: true);
+      final saved = provider.progresoPara(loaded);
+      expect(saved.repeticiones, 7);
+      expect(saved.rendido, isTrue);
+      expect(saved.rutinaCompletada, isTrue);
+      expect(
+        ProgresoPuzzle.fromJson(
+          saved.toJson(),
+          loaded.solucion.length,
+        ).ejercicioId,
+        'zancadas',
+      );
+      provider.dispose();
+    },
+  );
+
+  testWidgets('Summary lets the player choose and confirm the saved routine', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final provider = PuzzlesProvider(userId: 'A', service: CountingService());
+    final loaded = await provider.obtenerDiario();
+    await provider.guardar(
+      loaded,
+      ProgresoPuzzle(indice: loaded.solucion.length, errores: 1, pistas: {0}),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PuzzleScreen(puzzle: loaded, diario: provider),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final dropdown = find.byType(DropdownButtonFormField<String>);
+    await tester.ensureVisible(dropdown);
+    await tester.tap(dropdown);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Flexiones de brazos').last);
+    await tester.pumpAndSettle();
+    expect(provider.progresoPara(loaded).ejercicioId, 'flexiones');
+    await tester.ensureVisible(find.text('Listo'));
+    await tester.tap(find.text('Listo'));
+    await tester.pumpAndSettle();
+    expect(find.text('Rutina completada'), findsOneWidget);
+    expect(find.text('Listo'), findsNothing);
+    expect(find.text('7 repeticiones en total'), findsOneWidget);
+    expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     provider.dispose();
   });

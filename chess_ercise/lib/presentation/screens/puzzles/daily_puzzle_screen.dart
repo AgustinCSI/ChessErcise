@@ -28,8 +28,8 @@ class _DailyPuzzleScreenState extends State<DailyPuzzleScreen>
     _cargar();
   }
 
-  void _cargar() {
-    _puzzle = _diario.obtenerDiario();
+  void _cargar({bool actualizar = false}) {
+    _puzzle = _diario.obtenerDiario(actualizar: actualizar);
   }
 
   @override
@@ -45,7 +45,21 @@ class _DailyPuzzleScreenState extends State<DailyPuzzleScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('El desafío de hoy')),
+    appBar: AppBar(
+      title: const Text('El desafío de hoy'),
+      actions: [
+        FutureBuilder<PuzzleDiario>(
+          future: _puzzle,
+          builder: (context, snapshot) => IconButton(
+            tooltip: 'Actualizar puzzle',
+            icon: const Icon(Icons.refresh),
+            onPressed: snapshot.connectionState == ConnectionState.done
+                ? () => setState(() => _cargar(actualizar: true))
+                : null,
+          ),
+        ),
+      ],
+    ),
     body: SafeArea(
       child: Center(
         child: SingleChildScrollView(
@@ -128,7 +142,7 @@ class _DailyPuzzleScreenState extends State<DailyPuzzleScreen>
                                 ),
                               ),
                             );
-                            if (mounted) setState(() {});
+                            if (mounted) setState(_cargar);
                           },
                           child: Text(
                             terminado

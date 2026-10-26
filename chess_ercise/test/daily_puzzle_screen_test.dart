@@ -61,6 +61,14 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(service.calls, 2);
+    service.response = Completer();
+    await tester.tap(find.byTooltip('Actualizar puzzle'));
+    await tester.pump();
+    expect(service.calls, 3);
+    expect(find.text('Cargando el puzzle de Lichess…'), findsOneWidget);
+    service.response.complete(puzzle);
+    await tester.pumpAndSettle();
+    expect(find.text('Resolver puzzle'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     diario.dispose();
   });
