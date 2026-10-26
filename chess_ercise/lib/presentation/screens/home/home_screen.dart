@@ -4,8 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../providers/auth_provider.dart';
 import '../puzzles/daily_puzzle_screen.dart';
+import '../local/local_setup_screen.dart';
 
-// Menú temporal: los modos multijugador se habilitarán en sus bloques.
+// El modo local comparte dispositivo; online se implementará después.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -46,9 +47,13 @@ class HomeScreen extends StatelessWidget {
                       label: const Text('Puzzle diario'),
                     ),
                     const SizedBox(height: 12),
-                    const OutlinedButton(
-                      onPressed: null,
-                      child: Text('Multijugador local · Próximamente'),
+                    OutlinedButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const LocalSetupScreen(),
+                        ),
+                      ),
+                      child: const Text('Multijugador local · Un dispositivo'),
                     ),
                     const SizedBox(height: 12),
                     const OutlinedButton(

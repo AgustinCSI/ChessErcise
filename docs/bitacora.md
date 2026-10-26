@@ -13,23 +13,29 @@ Fecha inicial: 23 de octubre de 2026, America/Santiago.
 | 2026-10-24 | Control final de revisión | Diez Markdown, ocho públicos: enlaces/cierres/campos/estados correctos; ignore confirmado; hashes de fuentes conservados; índice y HEAD sin cambios | Revisión documental completada, aplicación aún no iniciada; formulario Supabase sigue en New Project | Completar proyecto y responder prioridad online; después revisar la parte a autorizar |
 | 2026-10-25 | Avance del equipo y conciliación del plan | Revisados commits 0b0c221/2ece14d y merge cdaaecd; main publicada coincide con local; app en chess_ercise/ con contador y test de plantilla | B02 en progreso: estructura aportada, no funciones de producto. Dart requerido ^3.13.5 frente a binario instalado 3.12.2; validación bloqueada. No se corrió pub get/analyze/test/build | Revisar informe 07 y autorizar cierre de B02 empezando por SDK común; conservar trabajo del compañero y ejecutar futuros comandos en chess_ercise/ |
 
+| 2026-10-25 | Merge autorizado de acceso y puzzle | Pull --ff-only de 294e4b1 a bdda951, ocho commits, sin conflictos; revision de 33 archivos cambiados | Auth/menu, puzzle, tablero, cache/progreso y resumen en codigo; 24 pruebas escritas no ejecutadas por SDK. Lockfile e INTERNET principal corregidos; rutina/CRUD/LAN/online pendientes | Alinear SDK y configurar ejecucion, validar codigo recibido y continuar lo pendiente; informe 08 |
+
+| 2026-10-25 | Ejecución real sin emulador | Flutter 3.47.8/Dart 3.13.7; dependencias resueltas con flags de escritorio desactivados solo en el proceso; análisis sin incidencias y 24 pruebas aprobadas; main real abierto en Edge/Wasm con JSON local y Auth settings HTTP 200 | Pantalla de ingreso observada; lanzador iniciar_app.cmd y guía 09 añadidos. JSON ignorado; sin sesión de usuario, SQL, cambios globales ni commits | Usuario prueba su ingreso; validar flujos restantes y Android. Reporte interno B02_04_ejecucion_real_edge.md |
+
+| 2026-10-25 | Local en un dispositivo, rama MultijugadorLocal | Usuario reemplaza LAN por juego frente a frente y prioriza local antes de online. Tablero compartido extraído; controller de partida, catálogo inicial y paneles orientados con retos implementados | Capturas, aceptar/Listo y rechazo/shot en código y pruebas; menú habilitado. Cambios previos de puzzle conservados; sin commits ni transporte LAN | Revisar modo local en Android físico con dos personas; después online. Alcance y funciones en documento 10 |
+
 ## Estado por bloque
 
 | Bloque | Estado técnico | Documento que se creará al trabajar | Aprobación para avanzar |
 |---|---|---|---|
 | B01 | En progreso documental; falta cierre de decisiones/proyecto externo | `bloques/B01/B01_01_alcance.md` | Pendiente |
-| B02 | En progreso: estructura aportada; validación bloqueada por SDK | `bloques/B02/B02_01_estructura.md` | Pendiente |
-| B03 | Pendiente | `bloques/B03/B03_01_dependencias.md` | Pendiente |
-| B04 | Pendiente | `bloques/B04/B04_01_configuracion.md` | Pendiente |
+| B02 | En progreso: SDK compatible, análisis y 24 pruebas correctos; ejecución real en navegador comprobada; falta Android | `bloques/B02/B02_04_ejecucion_real_edge.md` | Ejecución sin emulador autorizada; resto pendiente |
+| B03 | En progreso: motor/tablero de puzzle; falta validacion y contratos generales | `bloques/B03/B03_01_dependencias.md` | Pendiente |
+| B04 | En progreso: codigo Auth/menu; falta verificar con Supabase real | `bloques/B04/B04_01_configuracion.md` | Pendiente |
 | B05 | Pendiente | `bloques/B05/B05_01_modelo.md` | Pendiente |
 | B06 | Pendiente | `bloques/B06/B06_01_lista.md` | Pendiente |
-| B07 | Pendiente | `bloques/B07/B07_01_modelo_api.md` | Pendiente |
-| B08 | Pendiente | `bloques/B08/B08_01_posicion.md` | Pendiente |
-| B09 | Pendiente | `bloques/B09/B09_01_host.md` | Pendiente |
-| B10 | Pendiente | `bloques/B10/B10_01_protocolo.md` | Pendiente |
-| B11 | Pendiente | `bloques/B11/B11_01_captura.md` | Pendiente |
-| B12 | Pendiente; prioridad online por confirmar | `bloques/B12/B12_01_autorizacion.md` | Pendiente |
-| B13 | Pendiente; prioridad online por confirmar | `bloques/B13/B13_01_stream.md` | Pendiente |
+| B07 | En progreso: API/detalle/animaciones en codigo; validar ejecucion | `bloques/B07/B07_01_modelo_api.md` | Pendiente |
+| B08 | En progreso: resolucion/cache/resumen; falta ejercicio por fallo y Listo | `bloques/B08/B08_01_posicion.md` | Pendiente |
+| B09 | En progreso: base local compartida y controller en memoria; LAN sustituida | `bloques/B09/B09_01_tablero_compartido.md` y B09_02 | Implementación local autorizada |
+| B10 | En progreso: juego frente a frente implementado y probado; falta revisión física | `bloques/B10/B10_01_partida_frente_a_frente.md` | Implementación local autorizada |
+| B11 | En progreso: retos/Listo/shot probados; catálogo privado pendiente | `bloques/B11/B11_01_retos_por_perspectiva.md` | Implementación local autorizada |
+| B12 | Pendiente; sigue después de revisar local | `bloques/B12/B12_01_autorizacion.md` | Siguiente etapa solicitada |
+| B13 | Pendiente; depende de acceso online B12 | `bloques/B13/B13_01_stream.md` | Siguiente etapa solicitada |
 | B14 | Pendiente | `bloques/B14/B14_01_validacion.md` | Pendiente |
 
 La numeración vigente es la revisión del 24-10 del documento 04; la anterior no correspondía a desarrollo ya realizado. Las rutas representan el primer reporte futuro de cada bloque; habrá uno por parte. No se crean reportes de implementación de partes que no se han trabajado. El reporte interno `bloques/P00_revision_2026_10_24.md` registra solamente esta revisión y el ignore, sin declarar código de aplicación completado.
@@ -38,14 +44,14 @@ La numeración vigente es la revisión del 24-10 del documento 04; la anterior n
 
 | Pendiente | Referencia | Momento de resolución |
 |---|---|---|
-| Prioridad online para el lunes: no retirarlo sin decisión | Requisitos RF05 y pregunta al equipo | B01 |
+| Continuar online después de revisar local, secuencia confirmada por usuario | RF05 y documento 10 | B12–B13 |
 | Rechazo de castigo, categoría de valor, cantidades y campos de registro/perfil | D04 y mockups | B01; comprobar B06/B11 |
 | Completar proyecto Supabase y verificar identidad; dos cuentas de prueba | D05 y documento 06 | Preparar ahora; Auth B04; SQL autorizado B05 |
 | Rúbrica adicional si llega | D06; fecha lunes 26 y sección 1 ya identificadas | Conciliar cuando se aporte |
-| Unificar Dart ^3.13.5 del proyecto con entorno local 3.12.2; validar base/ignore | Informe 07 y B02 | Antes de resolver dependencias o cerrar B02 |
+| Completar validación Android; SDK local 3.13.7 ya compatible, análisis y 24 pruebas pasaron | Informe 09 y B02 | Antes de cerrar B02 |
 | Motor/tablero compatibles con SDK, resolución y comportamiento real | Arquitectura | B03 |
 | Autorización de SQL concreto y pruebas de aislamiento | Plan B05 | Dentro de B05, antes de ejecutar SQL |
-| Red local y dos Android para pruebas | D01 y arquitectura | B09–B11 |
+| Comodidad del tablero y controles en un Android físico entre dos personas; LAN sustituida | D01 y documento 10 | B09–B11 |
 
 ## Cómo mantener la bitácora
 

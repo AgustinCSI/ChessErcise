@@ -76,7 +76,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
       Text(
         _controller.jugador == Side.white
             ? 'Juegas con blancas'
-            : 'Juegas con negras',
+            : 'Juegas con negras', 
       ),
     ],
   );
