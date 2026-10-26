@@ -63,19 +63,26 @@ class PuzzleController extends ChangeNotifier {
       ? 'Revisando jugadas. Avanza hasta el final para continuar.'
       : mensaje;
 
-  void anterior() {
-    if (!puedeRetroceder) return;
-    vista--;
+  // SAN se calcula sobre la posición anterior, no sobre el tablero de revisión.
+  List<({int numero, Side lado, String san, int vista})> get historial => [
+    for (var i = 1; i < _posiciones.length; i++)
+      (
+        numero: _posiciones[i - 1].fullmoves,
+        lado: _posiciones[i - 1].turn,
+        san: _posiciones[i - 1].makeSan(_jugadas[i]!).$2,
+        vista: i,
+      ),
+  ];
+
+  void irA(int destino) {
+    if (destino < 0 || destino > totalJugadas || destino == vista) return;
+    vista = destino;
     pista = null;
     notifyListeners();
   }
 
-  void siguiente() {
-    if (!puedeAvanzar) return;
-    vista++;
-    pista = null;
-    notifyListeners();
-  }
+  void anterior() => irA(vista - 1);
+  void siguiente() => irA(vista + 1);
 
   void mostrarPista() {
     if (!puedeMover) return;
@@ -145,27 +152,6 @@ class PuzzleController extends ChangeNotifier {
     _posiciones.add(posicion);
     _jugadas.add(move);
     if (siguiendo) vista = totalJugadas;
-  }
-
-  void reiniciar() {
-    if (finalizado) return;
-    _respuesta?.cancel();
-    posicion = puzzle.posicionInicial;
-    ultimaJugada = puzzle.ultimaJugada;
-    indice = 0;
-    // Reiniciar la posición no borra errores ni pistas del intento diario.
-    esperando = false;
-    mensaje = 'Encuentra la mejor jugada.';
-    rendido = false;
-    pista = null;
-    vista = 0;
-    _posiciones
-      ..clear()
-      ..add(posicion);
-    _jugadas
-      ..clear()
-      ..add(ultimaJugada);
-    notifyListeners();
   }
 
   @override

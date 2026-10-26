@@ -112,7 +112,6 @@ void main() {
         progreso: reopened.progresoPara(loaded),
       );
       expect(restored.completado, isTrue);
-      restored.reiniciar();
       expect(restored.completado, isTrue);
       expect(restored.errores, 2);
       restored.dispose();
@@ -141,13 +140,7 @@ void main() {
     expect(find.text('Pistas usadas: 1'), findsOneWidget);
     await tester.tap(find.text('Revisar tablero'));
     await tester.pumpAndSettle();
-    final reset = tester.widget<IconButton>(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is IconButton && widget.tooltip == 'Volver a intentarlo',
-      ),
-    );
-    expect(reset.onPressed, isNull);
+    expect(find.byTooltip('Volver a intentarlo'), findsNothing);
     await tester.tap(find.byTooltip('Ver resumen'));
     await tester.pumpAndSettle();
     expect(find.text('Resumen diario'), findsOneWidget);

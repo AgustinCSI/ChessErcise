@@ -6,6 +6,9 @@ import 'package:chess_ercise/models/puzzle_diario.dart';
 import 'package:chess_ercise/presentation/screens/puzzles/puzzle_screen.dart';
 import 'package:chess_ercise/presentation/theme/app_theme.dart';
 import 'package:chess_ercise/presentation/widgets/tablero_widget.dart';
+import 'package:chess_ercise/presentation/widgets/player_info.dart';
+import 'package:chess_ercise/presentation/widgets/puzzle_status.dart';
+import 'package:chess_ercise/presentation/widgets/puzzle_moves.dart';
 import 'package:chess_ercise/presentation/widgets/puzzle_toolbar.dart';
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
@@ -60,23 +63,14 @@ void main() {
       expect(controller.completado, isTrue);
       expect(controller.posicion.isCheckmate, isTrue);
       expect(controller.puedeMover, isFalse);
-      final finalFen = controller.posicion.fen;
-      controller.reiniciar();
-      expect(controller.posicion.fen, finalFen);
       expect(controller.completado, isTrue);
       expect(controller.errores, 1);
       controller.dispose();
     },
   );
 
-  testWidgets('Reset and disposal cancel pending opponent reply', (
-    tester,
-  ) async {
+  testWidgets('Disposal cancels pending opponent reply', (tester) async {
     final controller = PuzzleController(PuzzleDiario.fromJson(fixture()));
-    controller.jugar(controller.puzzle.solucion.first);
-    controller.reiniciar();
-    await tester.pump(const Duration(seconds: 1));
-    expect(controller.indice, 0);
     controller.jugar(controller.puzzle.solucion.first);
     controller.dispose();
     await tester.pump(const Duration(seconds: 1));
@@ -138,7 +132,6 @@ void main() {
     controller.siguiente();
     expect(controller.posicionVisible.isCheckmate, isTrue);
     expect(controller.puedeMover, isFalse);
-    controller.reiniciar();
     expect(controller.rendido, isTrue);
     expect(controller.totalJugadas, 3);
     expect(controller.puedeMover, isFalse);
@@ -191,6 +184,7 @@ void main() {
     expect(controller.errores, 1);
     controller.jugar(Move.parse('a7a8q')!);
     expect(controller.completado, isTrue);
+    expect(controller.historial.single.san, 'a8=Q+');
     controller.dispose();
     final castle = PuzzleDiario.fromJson({
       'puzzle': {
@@ -203,7 +197,97 @@ void main() {
     final castleController = PuzzleController(castle);
     castleController.jugar(Move.parse('e1h1')!);
     expect(castleController.completado, isTrue);
+    expect(castleController.historial.single.san, 'O-O');
     castleController.dispose();
+  });
+
+  testWidgets('SAN numbers black starts and only includes accepted moves', (
+    tester,
+  ) async {
+    final controller = PuzzleController(PuzzleDiario.fromJson(fixture()));
+    expect(controller.historial, isEmpty);
+    controller.jugar(Move.parse('h3g3')!);
+    expect(controller.historial, isEmpty);
+    controller.jugar(controller.puzzle.solucion.first);
+    expect(controller.historial.map((m) => m.san), ['Bxf2+']);
+    expect(controller.historial.first.numero, 1);
+    expect(controller.historial.first.lado, Side.black);
+    await tester.pump(const Duration(milliseconds: 650));
+    expect(controller.historial.map((m) => m.san), ['Bxf2+', 'Kxf2']);
+    expect(controller.historial.last.numero, 2);
+    final live = controller.posicion.fen;
+    controller.irA(1);
+    expect(controller.puedeMover, isFalse);
+    expect(controller.posicion.fen, live);
+    controller.irA(2);
+    expect(controller.puedeMover, isTrue);
+    controller.rendirse();
+    expect(controller.historial.last.san, 'Qg3#');
+    controller.dispose();
+  });
+
+  testWidgets('Tapping notation reviews without changing saved progress', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.claro,
+        home: PuzzleScreen(puzzle: PuzzleDiario.fromJson(fixture())),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final controller = tester
+        .widget<TableroWidget>(find.byType(TableroWidget))
+        .puzzle;
+    controller.jugar(controller.puzzle.solucion.first);
+    await tester.pump(const Duration(milliseconds: 650));
+    await tester.pumpAndSettle();
+    final live = controller.posicion.fen;
+    await tester.tap(find.byTooltip('1... Bxf2+'));
+    await tester.pumpAndSettle();
+    expect(controller.vista, 1);
+    expect(controller.indice, 2);
+    expect(controller.posicion.fen, live);
+    expect(controller.puedeMover, isFalse);
+    expect(find.byTooltip('2... Qg3#'), findsNothing);
+    await tester.tap(find.byTooltip('2. Kxf2'));
+    await tester.pumpAndSettle();
+    expect(controller.puedeMover, isTrue);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('Review and completion messages keep board and player in place', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.claro,
+        home: PuzzleScreen(puzzle: PuzzleDiario.fromJson(fixture())),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final controller = tester
+        .widget<TableroWidget>(find.byType(TableroWidget))
+        .puzzle;
+    controller.jugar(controller.puzzle.solucion.first);
+    await tester.pump(const Duration(milliseconds: 650));
+    controller.jugar(controller.puzzle.solucion.last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Revisar tablero'));
+    await tester.pumpAndSettle();
+    final board = tester.getRect(find.byType(TableroWidget));
+    final player = tester.getRect(find.byType(PlayerInfo));
+    final status = tester.getRect(find.byType(PuzzleStatus));
+    await tester.tap(find.byTooltip('Jugada anterior'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Revisando jugadas.'), findsOneWidget);
+    expect(tester.getRect(find.byType(PuzzleStatus)), status);
+    expect(tester.getRect(find.byType(TableroWidget)), board);
+    expect(tester.getRect(find.byType(PlayerInfo)), player);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.binding.setSurfaceSize(null);
   });
 
   testWidgets(
@@ -228,14 +312,33 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.text('Juegas con negras'), findsOneWidget);
-        expect(find.byType(SingleChildScrollView), findsNothing);
+        expect(
+          find.byWidgetPredicate(
+            (w) =>
+                w is SingleChildScrollView &&
+                w.scrollDirection == Axis.vertical,
+          ),
+          findsNothing,
+        );
+        expect(find.byType(LinearProgressIndicator), findsNothing);
+        expect(find.textContaining('Jugada 0/'), findsNothing);
+        final player = tester.getRect(find.byType(PlayerInfo));
         final board = tester.getRect(find.byType(TableroWidget));
         final toolbar = tester.getRect(find.byType(PuzzleToolbar));
-        final reset = tester.getRect(find.byTooltip('Volver a intentarlo'));
+        expect(find.byTooltip('Volver a intentarlo'), findsNothing);
+        final strip = tester.getRect(find.byType(PuzzleMoves));
+        expect(player.top, closeTo(board.bottom + 8, 0.01));
+        expect(find.text('Tu nombre'), findsOneWidget);
+        if (size.width < 600) {
+          expect(
+            tester.getRect(find.byType(PuzzleStatus)).bottom,
+            lessThanOrEqualTo(board.top),
+          );
+        }
         expect(board.width, greaterThan(0));
         expect(board.width, closeTo(board.height, 0.01));
         expect(board.bottom, lessThanOrEqualTo(toolbar.top));
-        expect(reset.bottom, lessThanOrEqualTo(toolbar.top));
+        expect(strip.bottom, lessThanOrEqualTo(board.top));
         expect(tester.takeException(), isNull);
       }
       await tester.pumpWidget(const SizedBox.shrink());

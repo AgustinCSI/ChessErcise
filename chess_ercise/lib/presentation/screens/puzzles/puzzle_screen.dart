@@ -8,6 +8,9 @@ import '../../../logic/puzzle_controller.dart';
 import '../../../models/puzzle_diario.dart';
 import '../../widgets/tablero_widget.dart';
 import '../../widgets/puzzle_toolbar.dart';
+import '../../widgets/player_info.dart';
+import '../../widgets/puzzle_moves.dart';
+import '../../widgets/puzzle_status.dart';
 import '../../providers/puzzles_provider.dart';
 import '../../widgets/puzzle_save_status.dart';
 import 'puzzle_summary_screen.dart';
@@ -77,58 +80,35 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
     ],
   );
 
-  Widget _estado(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      LinearProgressIndicator(value: _controller.progreso),
-      const SizedBox(height: 8),
-      AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: _controller.completado
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Semantics(
-          liveRegion: true,
-          child: Text(_controller.mensajeVisible),
-        ),
-      ),
-      const SizedBox(height: 4),
-      Row(
-        children: [
-          Expanded(
-            child: Text(
-              'Jugada ${_controller.vista}/${_controller.totalJugadas} · Errores: ${_controller.errores}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-          IconButton(
-            tooltip: 'Volver a intentarlo',
-            onPressed: _controller.finalizado ? null : _controller.reiniciar,
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
-      Text(
-        widget.diario == null
-            ? 'Lichess'
-            : 'Lichess · Guardado en este dispositivo',
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
-    ],
+  Widget _estado(BuildContext context) => PuzzleStatus(
+    mensaje: _controller.mensajeVisible,
+    completado: _controller.completado,
   );
 
   Widget _tablero() => LayoutBuilder(
-    builder: (context, constraints) => Center(
-      child: TableroWidget(
-        puzzle: _controller,
-        size: math.min(constraints.maxWidth, constraints.maxHeight),
-      ),
-    ),
+    builder: (context, constraints) {
+      // Tablero y jugador forman una sola unidad, sin espacios flexibles entre sí.
+      const pie = 112.0;
+      final size = math.max(
+        0.0,
+        math.min(constraints.maxWidth, constraints.maxHeight - pie),
+      );
+      return Center(
+        child: SizedBox(
+          width: math.min(constraints.maxWidth, math.max(size, 200)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              PuzzleMoves(controller: _controller),
+              const SizedBox(height: 8),
+              TableroWidget(puzzle: _controller, size: size),
+              const SizedBox(height: 8),
+              const SizedBox(height: 48, child: PlayerInfo()),
+            ],
+          ),
+        ),
+      );
+    },
   );
 
   @override
@@ -217,10 +197,10 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _encabezado(context),
-                      const SizedBox(height: 8),
-                      Expanded(child: _tablero()),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       _estado(context),
+                      const SizedBox(height: 12),
+                      Expanded(child: _tablero()),
                     ],
                   ),
                 ),
