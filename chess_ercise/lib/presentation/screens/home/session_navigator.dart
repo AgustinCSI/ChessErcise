@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/puzzles_provider.dart';
 
-import 'home_screen.dart';
+import 'main_screen.dart';
 
 // Al terminar la sesión se destruye también la pila de pantallas privadas.
 class SessionNavigator extends StatefulWidget {
@@ -48,7 +48,7 @@ class _SessionNavigatorState extends State<SessionNavigator>
       child: Navigator(
         key: _navigator,
         onGenerateRoute: (_) =>
-            MaterialPageRoute<void>(builder: (_) => const HomeScreen()),
+            MaterialPageRoute<void>(builder: (_) => const MainScreen()),
       ),
     ),
   );
