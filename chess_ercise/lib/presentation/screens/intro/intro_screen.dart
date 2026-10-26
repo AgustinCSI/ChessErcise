@@ -4,8 +4,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../theme/app_theme.dart';
-
 class IntroScreen extends StatefulWidget {
   const IntroScreen({
     super.key,
@@ -15,7 +13,7 @@ class IntroScreen extends StatefulWidget {
 
   final VoidCallback onFinished;
   final bool esperando;
-  static const duracion = Duration(milliseconds: 2600);
+  static const duracion = Duration(milliseconds: 1900);
 
   @override
   State<IntroScreen> createState() => _IntroScreenState();
@@ -44,15 +42,12 @@ class _IntroScreenState extends State<IntroScreen>
 
   Future<void> _cargar() async {
     // Los PNG de Canva incluyen márgenes transparentes; el painter usa su área visible.
-    for (final nombre in [
-      'ChessErcise_logo.png',
-      ..._simbolos.map((s) => s.archivo),
-    ]) {
+    for (final nombre in _simbolos.map((s) => s.archivo)) {
       try {
         final data = await rootBundle.load('assets/intro_screen/$nombre');
         final codec = await ui.instantiateImageCodec(
           data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
-          targetWidth: nombre == 'ChessErcise_logo.png' ? 500 : 960,
+          targetWidth: 960,
         );
         late ui.Image imagen;
         try {
@@ -88,7 +83,7 @@ class _IntroScreenState extends State<IntroScreen>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppTheme.colorFondo,
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: SafeArea(
       child: Column(
         children: [
@@ -107,23 +102,75 @@ class _IntroScreenState extends State<IntroScreen>
                       dimension: size,
                       child: AnimatedBuilder(
                         animation: _animacion,
-                        builder: (context, _) => CustomPaint(
-                          painter: _IntroPainter(
-                            _imagenes,
-                            _reducido ? 0.6 : _animacion.value,
-                          ),
-                          child: _imagenes.containsKey('ChessErcise_logo.png')
-                              ? null
-                              : const Center(
-                                  child: Text(
-                                    'ChessErcise',
-                                    style: TextStyle(
-                                      fontSize: 32,
-                                      fontWeight: FontWeight.w900,
+                        builder: (context, _) {
+                          final progreso = _reducido ? 0.6 : _animacion.value;
+                          final tiempo =
+                              progreso * IntroScreen.duracion.inMilliseconds;
+                          final entradaTexto = ((tiempo - 312) / 520).clamp(
+                            0.0,
+                            1.0,
+                          );
+                          return Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CustomPaint(
+                                painter: _IntroPainter(_imagenes, progreso),
+                              ),
+                              Positioned(
+                                left: size * 0.12,
+                                top: size * (0.54 + 0.024 * (1 - entradaTexto)),
+                                width: size * 0.76,
+                                height: size * 0.17,
+                                child: Opacity(
+                                  opacity: entradaTexto,
+                                  child: ExcludeSemantics(
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          flex: 3,
+                                          child: FittedBox(
+                                            child: Text(
+                                              'CHESSERCISE',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineLarge
+                                                  ?.copyWith(
+                                                    color: Colors.black,
+                                                    fontSize: 48,
+                                                    fontWeight: FontWeight.w900,
+                                                    letterSpacing: -1.5,
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Center(
+                                            child: FittedBox(
+                                              child: Text(
+                                                'PLAY. MOVE. WIN.',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium
+                                                    ?.copyWith(
+                                                      color: Colors.black,
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      letterSpacing: 3.2,
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                        ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   );
@@ -225,31 +272,16 @@ class _IntroPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.save();
     canvas.scale(size.width / 500);
-    final logo = imagenes['ChessErcise_logo.png'];
-    if (logo != null) {
-      final entrada = ((progreso - 0.12) / 0.2).clamp(0.0, 1.0);
-      // Reutilizar el wordmark exacto, sin sustituir la tipografía del logo.
-      _dibujar(
-        canvas,
-        logo,
-        const Rect.fromLTWH(60, 270, 380, 85),
-        const Rect.fromLTWH(
-          60,
-          270,
-          380,
-          85,
-        ).shift(Offset(0, 12 * (1 - entrada))),
-        entrada,
-      );
-    }
+    // Mantener 650 ms de entrada y 416 ms de salida; solo reducir la pausa central.
+    final tiempo = progreso * IntroScreen.duracion.inMilliseconds;
     for (final simbolo in _simbolos) {
       final image = imagenes[simbolo.archivo];
       if (image == null) continue;
       final entrada = Curves.easeOutCubic.transform(
-        ((progreso - simbolo.inicio) / 0.25).clamp(0.0, 1.0),
+        ((tiempo - simbolo.inicio * 2600) / 650).clamp(0.0, 1.0),
       );
       final salida = Curves.easeInCubic.transform(
-        ((progreso - 0.8 - simbolo.inicio * 0.25) / 0.16).clamp(0.0, 1.0),
+        ((tiempo - 1380 - simbolo.inicio * 650) / 416).clamp(0.0, 1.0),
       );
       final destino = simbolo.destino.shift(
         Offset(0, 35 * (1 - entrada) - 24 * salida),

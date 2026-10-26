@@ -25,8 +25,22 @@ void main() {
       await cargarIntro(tester);
       await tester.pump(const Duration(milliseconds: 1200));
       expect(find.byType(IntroScreen), findsOneWidget);
+      expect(find.text('CHESSERCISE'), findsOneWidget);
+      expect(find.text('PLAY. MOVE. WIN.'), findsOneWidget);
+      expect(
+        tester
+            .widget<Scaffold>(
+              find.descendant(
+                of: find.byType(IntroScreen),
+                matching: find.byType(Scaffold),
+              ),
+            )
+            .backgroundColor,
+        Theme.of(tester.element(find.byType(IntroScreen)))
+            .scaffoldBackgroundColor,
+      );
       expect(find.textContaining('SUPABASE_URL'), findsNothing);
-      await tester.pump(const Duration(milliseconds: 1500));
+      await tester.pump(const Duration(milliseconds: 750));
       await tester.pumpAndSettle();
       expect(find.textContaining('SUPABASE_URL'), findsOneWidget);
       expect(find.byType(IntroScreen), findsNothing);
