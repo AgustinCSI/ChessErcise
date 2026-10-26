@@ -356,6 +356,7 @@ void main() {
         const Size(390, 844),
         const Size(740, 360),
         const Size(1280, 720),
+        const Size(1920, 1080),
       ]) {
         await tester.binding.setSurfaceSize(size);
         await tester.pumpWidget(
@@ -401,11 +402,18 @@ void main() {
             strip.top,
             closeTo(tester.getRect(find.byType(PuzzleStatus)).bottom + 4, 0.01),
           );
-          expect(strip.width, closeTo(size.width - 24, 0.01));
+
           expect(
             tester.getRect(find.byType(PuzzleStatus)).bottom,
             lessThanOrEqualTo(board.top),
           );
+        }
+        expect(strip.left, closeTo(board.left, 0.01));
+        expect(strip.right, closeTo(board.right, 0.01));
+        if (size.width >= 1280) {
+          final info = tester.getRect(find.byType(PuzzleStatus));
+          expect(info.left - board.right, closeTo(24, 0.01));
+          expect(board.width, lessThanOrEqualTo(560));
         }
         expect(board.width, greaterThan(0));
         expect(board.width, closeTo(board.height, 0.01));

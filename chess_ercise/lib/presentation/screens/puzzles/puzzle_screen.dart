@@ -89,7 +89,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
   Widget _tablero() => LayoutBuilder(
     builder: (context, constraints) {
       // Tablero y jugador forman una sola unidad, sin espacios flexibles entre sí.
-      const pie = 96.0;
+      const pie = 152.0;
       final size = math.max(
         0.0,
         math.min(constraints.maxWidth, constraints.maxHeight - pie),
@@ -101,6 +101,11 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              SizedBox(
+                width: size,
+                child: PuzzleMoves(controller: _controller),
+              ),
+              const SizedBox(height: 8),
               TableroWidget(puzzle: _controller, size: size),
               const SizedBox(height: 8),
               const SizedBox(height: 48, child: PlayerInfo()),
@@ -207,19 +212,19 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                   constraints.maxWidth > constraints.maxHeight;
               if (horizontal) {
                 return Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1120),
+                  child: SizedBox(
+                    width:
+                        math.min(
+                          560.0,
+                          math.min(
+                            constraints.maxWidth - 304,
+                            math.max(200.0, constraints.maxHeight - 152),
+                          ),
+                        ) +
+                        304,
                     child: Row(
                       children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              PuzzleMoves(controller: _controller),
-                              const SizedBox(height: 8),
-                              Expanded(child: _tablero()),
-                            ],
-                          ),
-                        ),
+                        Expanded(child: _tablero()),
                         const SizedBox(width: 24),
                         SizedBox(
                           width: 280,
@@ -257,8 +262,6 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
                       const SizedBox(height: 8),
                       _estado(context),
                       const SizedBox(height: 4),
-                      PuzzleMoves(controller: _controller),
-                      const SizedBox(height: 8),
                       Expanded(child: _tablero()),
                     ],
                   ),
