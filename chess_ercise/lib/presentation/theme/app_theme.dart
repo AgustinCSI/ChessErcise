@@ -10,6 +10,10 @@ class AppTheme {
   static const colorVioleta = Color(0xFF7336AF);
   static const colorCasillaClara = Color(0xFFFFFBFE);
   static const colorCasillaRosa = Color(0xFFF8D7E2);
+  static const colorTexto = Color(0xFF24151E);
+  static const colorTextoSecundario = Color(0xFF49313E);
+  static const colorAceptar = Color(0xFF087F52);
+  static const colorRechazar = Color(0xFFC4123D);
 
   // Un único esquema para puzzle, frente a frente y Wi-Fi.
   static const tablero = ChessboardColorScheme(
@@ -47,14 +51,20 @@ class AppTheme {
     colorScheme: ColorScheme.fromSeed(seedColor: colorPrincipal).copyWith(
       primary: colorPrincipal,
       primaryContainer: const Color(0xFFF8B5CF),
-      onPrimaryContainer: const Color(0xFF52112C),
+      onPrimaryContainer: colorTexto,
+      onSurface: colorTexto,
+      onSurfaceVariant: colorTextoSecundario,
       tertiary: colorVioleta,
       surface: const Color(0xFFFFF1F8),
     ),
     scaffoldBackgroundColor: colorFondo,
+    textTheme: Typography.material2021().black.apply(
+      bodyColor: colorTexto,
+      displayColor: colorTexto,
+    ),
     appBarTheme: const AppBarTheme(
       backgroundColor: colorFondo,
-      foregroundColor: Color(0xFF321523),
+      foregroundColor: colorTexto,
       centerTitle: false,
     ),
     navigationBarTheme: const NavigationBarThemeData(

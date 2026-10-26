@@ -23,6 +23,10 @@ Fecha inicial: 23 de octubre de 2026, America/Santiago.
 
 | 2026-10-26 | Dos modos locales y revisión de mockups | Usuario solicita Frente a frente y recuperar Local Wi-Fi; revisadas páginas 2/7/10–13 del PDF; paleta compartida, tarjetas de selección, transporte y pantalla Wi-Fi implementados | Tablero, motor, ficha, retos y tira de jugadas reutilizados. Sockets reales en loopback prueban ambos jugadores y desafíos; APK Android compilado; sin modificar Supabase | Probar dos Android en la misma Wi-Fi y revisar comodidad; después continuar online. Documento 11 y reportes internos por parte; sin commits |
 
+| 2026-10-26 | Respuestas al reto y contraste | Aplicada nueva referencia: botones rojo/verde del mismo tamaño, rechazo a la izquierda; texto oscuro y etiquetas reforzados desde el tema compartido | Mismo panel y callbacks para Frente a frente/Wi-Fi; análisis correcto y 62 pruebas aprobadas; captura interna revisada | Revisar el diseño actualizado. Reporte B11_03_respuestas_y_contraste.md; sin commits |
+
+| 2026-10-26 | Respaldo de imágenes del historial | Revisada captura de asset fallido; bundle y HTTP del alfil/rey correctos actualmente; puzzle real abre sin reproducir el fallo intermitente | Tira compartida muestra letra SAN cuando falla una imagen, sin perder historial o selección; 64 pruebas aprobadas, incluida simulación de recursos ausentes | Revisar puzzle/Wi-Fi actualizados; reporte B10_04_respaldo_assets_historial.md. Sin commits |
+
 ## Estado por bloque
 
 | Bloque | Estado técnico | Documento que se creará al trabajar | Aprobación para avanzar |

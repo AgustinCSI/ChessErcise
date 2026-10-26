@@ -110,6 +110,18 @@ class _TiraJugadasState extends State<TiraJugadas> {
                             ).kind]!,
                         width: 22,
                         height: 22,
+                        // Mantener SAN legible ante un fallo puntual del asset.
+                        errorBuilder: (context, error, stackTrace) => SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: Center(
+                            child: Text(
+                              move.san[0],
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ),
                       ),
                       Text(move.san.substring(1)),
                     ] else

@@ -18,7 +18,7 @@ class TarjetaModo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Opacity(
-    opacity: onTap == null ? .55 : 1,
+    opacity: onTap == null ? .72 : 1,
     child: Material(
       color: AppTheme.colorTarjeta,
       borderRadius: BorderRadius.circular(20),
@@ -39,13 +39,13 @@ class TarjetaModo extends StatelessWidget {
                       titulo,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: const Color(0xFF681337),
+                        color: AppTheme.colorTexto,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       descripcion,
-                      style: const TextStyle(color: Color(0xFF681337)),
+                      style: const TextStyle(color: AppTheme.colorTexto),
                     ),
                   ],
                 ),

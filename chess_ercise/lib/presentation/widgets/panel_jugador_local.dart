@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../logic/partida_local_controller.dart';
 import '../../models/reto_local.dart';
+import '../theme/app_theme.dart';
 import 'player_info.dart';
 
 // La misma zona se construye para ambos jugadores; la pantalla gira la superior.
@@ -46,6 +47,25 @@ class PanelJugadorLocal extends StatelessWidget {
     FaseLocal.shot => partida.retado == lado,
     FaseLocal.finalizada => true,
   };
+
+  Widget _botonRespuesta(BuildContext context, bool acepta) => FilledButton(
+    style: FilledButton.styleFrom(
+      backgroundColor: acepta ? AppTheme.colorAceptar : AppTheme.colorRechazar,
+      foregroundColor: Colors.white,
+      minimumSize: const Size.fromHeight(96),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+      textStyle: Theme.of(context).textTheme.labelLarge
+          ?.copyWith(fontSize: 16, fontWeight: FontWeight.w700),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    ),
+    onPressed: () => onResponder != null
+        ? onResponder!(acepta)
+        : partida.responder(lado, acepta: acepta),
+    child: Text(
+      acepta ? 'Aceptar reto' : 'Rechazar',
+      textAlign: TextAlign.center,
+    ),
+  );
 
   Widget _acciones(BuildContext context) {
     switch (partida.fase) {
@@ -96,27 +116,12 @@ class PanelJugadorLocal extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text('${partida.reto!.titulo} · ${partida.reto!.indicacion}'),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
+            const SizedBox(height: 12),
+            Row(
               children: [
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF087F52),
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () => onResponder != null
-                      ? onResponder!(true)
-                      : partida.responder(lado, acepta: true),
-                  child: const Text('Aceptar reto'),
-                ),
-                OutlinedButton(
-                  onPressed: () => onResponder != null
-                      ? onResponder!(false)
-                      : partida.responder(lado, acepta: false),
-                  child: const Text('Rechazar'),
-                ),
+                Expanded(child: _botonRespuesta(context, false)),
+                const SizedBox(width: 16),
+                Expanded(child: _botonRespuesta(context, true)),
               ],
             ),
           ],
