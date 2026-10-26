@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../home/session_navigator.dart';
+import '../profile/profile_gate.dart';
 import 'login_screen.dart';
 
 // La sesión decide qué pantalla se muestra; no navegamos manualmente al entrar.
@@ -35,7 +35,7 @@ class _AuthGateState extends State<AuthGate> {
           Expanded(
             child: _auth.currentSession == null
                 ? const LoginScreen()
-                : SessionNavigator(
+                : ProfileGate(
                     key: ValueKey(_auth.currentUser!.id),
                     userId: _auth.currentUser!.id,
                   ),

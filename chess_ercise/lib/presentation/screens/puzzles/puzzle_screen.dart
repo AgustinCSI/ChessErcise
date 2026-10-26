@@ -3,6 +3,9 @@ import 'dart:math' as math;
 
 import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/perfil_provider.dart';
 
 import '../../../logic/puzzle_controller.dart';
 import '../../../models/puzzle_diario.dart';
@@ -88,6 +91,7 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
 
   Widget _tablero() => LayoutBuilder(
     builder: (context, constraints) {
+      final foto = context.watch<PerfilProvider?>()?.fotoBytes;
       // Tablero y jugador forman una sola unidad, sin espacios flexibles entre sí.
       const pie = 152.0;
       final size = math.max(
@@ -108,7 +112,15 @@ class _PuzzleScreenState extends State<PuzzleScreen> {
               const SizedBox(height: 8),
               TableroWidget(puzzle: _controller, size: size),
               const SizedBox(height: 8),
-              const SizedBox(height: 48, child: PlayerInfo()),
+              SizedBox(
+                height: 48,
+                child: PlayerInfo(
+                  imagen: foto == null ? null : MemoryImage(foto),
+                  nombre:
+                      context.watch<PerfilProvider?>()?.perfil?.username ??
+                      'Tu nombre',
+                ),
+              ),
               const SizedBox(height: 8),
               Row(
                 key: const ValueKey('puzzle-counters'),
