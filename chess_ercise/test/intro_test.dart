@@ -1,6 +1,12 @@
 import 'dart:async';
 
 import 'package:chess_ercise/app.dart';
+import 'package:chess_ercise/data/perfil_service.dart';
+import 'package:chess_ercise/models/perfil.dart';
+import 'package:chess_ercise/presentation/providers/auth_provider.dart';
+import 'package:chess_ercise/presentation/screens/profile/profile_gate.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:chess_ercise/presentation/screens/intro/intro_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,7 +23,100 @@ Future<void> cargarIntro(WidgetTester tester) async {
   await tester.pump();
 }
 
+class StartupProfileService extends PerfilService {
+  final respuesta = Completer<Perfil?>();
+  int consultas = 0;
+  @override
+  Future<Perfil?> obtener(String userId) {
+    consultas++;
+    return respuesta.future;
+  }
+}
+
+Widget appConPerfil(StartupProfileService service, GoTrueClient auth) =>
+    ChessErciseApp(
+      supabaseDisponible: true,
+      construirSesion: (onReady) => ChangeNotifierProvider(
+        create: (_) => AuthProvider(auth: auth),
+        child: ProfileGate(
+          userId: 'A',
+          service: service,
+          onReady: onReady,
+          child: const Scaffold(body: Text('Menú preparado')),
+        ),
+      ),
+    );
+
 void main() {
+  testWidgets(
+    'Profile loads during intro and menu appears without checking screen',
+    (tester) async {
+      final service = StartupProfileService();
+      final auth = GoTrueClient();
+      await tester.pumpWidget(appConPerfil(service, auth));
+      await cargarIntro(tester);
+      expect(service.consultas, 1);
+      expect(find.byType(IntroScreen), findsOneWidget);
+      expect(find.text('Comprobando perfil'), findsNothing);
+      service.respuesta.complete(
+        Perfil(
+          id: 'A',
+          username: 'Knight',
+          fechaNacimiento: DateTime(2000),
+          genero: 'otro',
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('Menú preparado'), findsNothing);
+      await tester.pump(const Duration(milliseconds: 1950));
+      await tester.pumpAndSettle();
+      expect(find.text('Menú preparado'), findsOneWidget);
+      expect(find.byType(IntroScreen), findsNothing);
+      expect(find.text('Comprobando perfil'), findsNothing);
+      expect(service.consultas, 1);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(find.byType(IntroScreen), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+      auth.dispose();
+    },
+  );
+
+  for (final falla in [false, true]) {
+    testWidgets(
+      'Slow profile check stays on intro and shows ${falla ? 'error' : 'setup'} directly',
+      (tester) async {
+        final service = StartupProfileService();
+        final auth = GoTrueClient();
+        await tester.pumpWidget(appConPerfil(service, auth));
+        await cargarIntro(tester);
+        await tester.pump(const Duration(seconds: 3));
+        await tester.pump();
+        expect(find.text('Preparando tu cuenta…'), findsOneWidget);
+        expect(find.text('Comprobando perfil'), findsNothing);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        if (falla) {
+          service.respuesta.completeError(StateError('offline'));
+        } else {
+          service.respuesta.complete(null);
+        }
+        await tester.pumpAndSettle();
+        expect(find.byType(IntroScreen), findsNothing);
+        expect(find.text('Comprobando perfil'), findsNothing);
+        expect(
+          find.text(falla ? 'Reintentar' : 'Completa tu perfil'),
+          findsOneWidget,
+        );
+        expect(service.consultas, 1);
+        await tester.pumpWidget(const SizedBox.shrink());
+        auth.dispose();
+      },
+    );
+  }
+
   testWidgets(
     'Startup shows intro once, then configuration; rebuild does not replay',
     (tester) async {

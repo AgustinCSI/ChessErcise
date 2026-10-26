@@ -11,10 +11,12 @@ class ChessErciseApp extends StatefulWidget {
     super.key,
     this.supabaseDisponible,
     this.inicializacion,
+    this.construirSesion,
   }) : assert(supabaseDisponible != null || inicializacion != null);
 
   final bool? supabaseDisponible;
   final Future<bool>? inicializacion;
+  final Widget Function(ValueChanged<bool> onReady)? construirSesion;
 
   @override
   State<ChessErciseApp> createState() => _ChessErciseAppState();
@@ -23,6 +25,31 @@ class ChessErciseApp extends StatefulWidget {
 class _ChessErciseAppState extends State<ChessErciseApp> {
   bool? _disponible;
   bool _introTerminada = false;
+  bool _destinoListo = false;
+  bool _entradaMostrada = false;
+
+  void _intentarAbrir() {
+    if (_introTerminada &&
+        _disponible != null &&
+        (!_disponible! || _destinoListo)) {
+      _entradaMostrada = true;
+    }
+  }
+
+  void _destinoPreparado(bool listo) {
+    if (!mounted || _entradaMostrada) return;
+    setState(() {
+      _destinoListo = listo;
+      _intentarAbrir();
+    });
+  }
+
+  void _terminarIntro() {
+    setState(() {
+      _introTerminada = true;
+      _intentarAbrir();
+    });
+  }
 
   @override
   void initState() {
@@ -37,7 +64,12 @@ class _ChessErciseAppState extends State<ChessErciseApp> {
   }
 
   void _terminarInicio(bool disponible) {
-    if (mounted) setState(() => _disponible = disponible);
+    if (mounted) {
+      setState(() {
+        _disponible = disponible;
+        _intentarAbrir();
+      });
+    }
   }
 
   @override
@@ -45,21 +77,30 @@ class _ChessErciseAppState extends State<ChessErciseApp> {
     title: 'ChessErcise',
     debugShowCheckedModeBanner: false,
     theme: AppTheme.claro,
-    home: AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: !_introTerminada || _disponible == null
-          ? IntroScreen(
-              key: const ValueKey('intro'),
-              esperando: _introTerminada && _disponible == null,
-              onFinished: () => setState(() => _introTerminada = true),
-            )
-          : _disponible!
-          ? ChangeNotifierProvider(
-              key: const ValueKey('auth'),
-              create: (_) => AuthProvider(),
-              child: const AuthGate(),
-            )
-          : const Scaffold(
+    home: Stack(
+      fit: StackFit.expand,
+      children: [
+        if (_disponible == true)
+          Offstage(
+            key: const ValueKey('sesion'),
+            offstage: !_entradaMostrada,
+            child: TickerMode(
+              enabled: _entradaMostrada,
+              child: ExcludeFocus(
+                excluding: !_entradaMostrada,
+                child:
+                    widget.construirSesion?.call(_destinoPreparado) ??
+                    ChangeNotifierProvider(
+                      create: (_) => AuthProvider(),
+                      child: AuthGate(onReady: _destinoPreparado),
+                    ),
+              ),
+            ),
+          )
+        else if (_disponible == false)
+          Offstage(
+            offstage: !_entradaMostrada,
+            child: const Scaffold(
               key: ValueKey('configuracion'),
               body: SafeArea(
                 child: Center(
@@ -76,6 +117,21 @@ class _ChessErciseAppState extends State<ChessErciseApp> {
                 ),
               ),
             ),
+          ),
+        IgnorePointer(
+          ignoring: _entradaMostrada,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: _entradaMostrada
+                ? const SizedBox.expand(key: ValueKey('listo'))
+                : IntroScreen(
+                    key: const ValueKey('intro'),
+                    esperando: _introTerminada,
+                    onFinished: _terminarIntro,
+                  ),
+          ),
+        ),
+      ],
     ),
   );
 }
