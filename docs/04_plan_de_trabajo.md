@@ -1,30 +1,34 @@
 # 04 · Plan de trabajo por partes revisables
 
-Revisión: 25 de octubre de 2026. Se mantiene la secuencia de catorce bloques del día 24. **Se incorpora la base Flutter aportada por Juan Pablo Molina**: B02 está en progreso, no terminado. Evidencia, bloqueos y estado por función: [revisión del avance](07_revision_avance_2026_10_25.md).
+> Cambio de alcance autorizado el 25-10: **local frente a frente en un solo dispositivo; después online**. Se reemplazan las tareas LAN de B09–B11 por tablero compartido, partida en memoria y retos orientados. Las fichas LAN que siguen se conservan como antecedentes, no como tareas a implementar. [Plan vigente, funciones y partes para commit](10_multijugador_local_un_dispositivo.md).
+
+Revisión: 25 de octubre de 2026, posterior al merge **bdda951**. Se mantiene la secuencia de catorce bloques, reconociendo acceso y puzzle ya implementados en código por Juan Pablo Molina. No repetir esas implementaciones ni confundirlas con validación completa. Estado vigente y hallazgos: [revisión del merge](08_revision_merge_bdda951.md). El informe 07 queda como revisión histórica previa.
 
 **Raíces de trabajo:** el repositorio es `ChessErcise/`; la aplicación está en `chess_ercise/`. Todas las rutas de aplicación de las fichas (lib, models, data, logic, presentation, test, android, pubspec) son relativas a esa carpeta. Documentación y SQL propuesto permanecen en la raíz Git. Ejecutar Flutter dentro de `chess_ercise/`; no crear otra aplicación en la raíz.
 
+Actualización de ejecución: Flutter 3.47.8/Dart 3.13.7 ya satisfacen el requisito, el análisis no reportó incidencias y las 24 pruebas pasaron. Se abrió el main real en navegador con Supabase del usuario, sin emulador. [Evidencia y límites](09_ejecucion_local_sin_emulador.md). No repetir la solución de un SDK que ya está alineado; falta validar Android y los criterios funcionales restantes.
+
 ## 1. Alcance y orden
 
-Se conservan todos los modos de la propuesta: LAN, online y puzzle. La priorización para el lunes 26 sigue pendiente de confirmación; online no se retira automáticamente. Android es la única plataforma. La forma de programación de clases 5–7 es obligatoria, según [01](01_analisis_unidad_2.md).
+Se mantienen puzzle y online; el modo local pasa de LAN a un solo dispositivo. El usuario confirma trabajar primero en local y luego en online. Android es la plataforma de entrega; navegador es la vista de desarrollo autorizada. La forma de programación de clases 5–7 sigue siendo obligatoria, según [01](01_analisis_unidad_2.md).
 
-Recomendación: preparación Supabase ahora → base Android → compatibilidad de tablero/motor → Auth → CRUD → puzzle/API → LAN/transporte → partida → desafíos → online → entrega. La propuesta de preparar primero LAN+puzzle y dejar online después necesita aprobación expresa.
+Secuencia actual: revisar el modo local implementado y probarlo en dispositivo; después continuar online B12/B13. El compañero trabaja en perfil y ajustes del puzzle. CRUD privado B05/B06 y validaciones Android siguen pendientes; el catálogo local inicial no los reemplaza. No reimplementar los bloques ya recibidos.
 
-La estructura inicial ya fue generada por el compañero en `0b0c221`; se conserva. Aprobar arquitectura o revisar avances no autoriza implementar todas las funcionalidades. La revisión del día 25 solo actualiza documentación y comprueba el estado existente.
+La base de 0b0c221 y las funciones integradas en bdda951 se conservan. En MultijugadorLocal se añadió el modo de un dispositivo, se extrajo el tablero compartido y se conservaron los cambios pendientes del puzzle. No se publicaron cambios ni se crearon commits.
 
 | Bloque | Resultado | Mínimo académico / producto | Estado |
 |---|---|---|---|
 | B01 | Cerrar alcance y preparar Supabase | Documentación revisada; cierre de decisiones/proyecto externo pendiente | En progreso |
-| B02 | Base Flutter Android | Estructura generada; verificación bloqueada por Dart 3.12.2 frente a ^3.13.5 | En progreso |
-| B03 | Compatibilidad, motor y tablero | Núcleo académico/producto o preparación | Pendiente |
-| B04 | Acceso real y menú de modos | Núcleo académico/producto o preparación | Pendiente |
+| B02 | Base Flutter Android | Análisis y 24 tests correctos; main real abierto en Edge/Wasm; validación Android pendiente | En progreso |
+| B03 | Compatibilidad, motor y tablero | Tablero/motor usados por puzzle; falta validar y completar contratos generales | En progreso |
+| B04 | Acceso real y menú de modos | Código Auth y menú presente; pruebas contra proyecto real pendientes | En progreso |
 | B05 | Datos privados de ejercicios | Núcleo académico/producto o preparación | Pendiente |
 | B06 | Catálogo y formulario de ejercicios | Núcleo académico/producto o preparación | Pendiente |
-| B07 | API del puzzle, tarjeta y detalle | Núcleo académico/producto o preparación | Pendiente |
-| B08 | Resolver puzzle y confirmar ejercicio | Núcleo académico/producto o preparación | Pendiente |
-| B09 | Transporte LAN y sala host/cliente | Núcleo académico/producto o preparación | Pendiente |
-| B10 | Partida de ajedrez sincronizada | Núcleo académico/producto o preparación | Pendiente |
-| B11 | Elegir castigo y confirmar Listo en LAN | Núcleo académico/producto o preparación | Pendiente |
+| B07 | API del puzzle, tarjeta y detalle | Código API/FutureBuilder/constructor/Hero/implícita presente; validar | En progreso |
+| B08 | Resolver puzzle y confirmar ejercicio | Resolución/guardado/resumen presentes; ejercicio y Listo pendientes | En progreso |
+| B09 | Base local: tablero reutilizado, motor y fases en memoria | Código y pruebas incorporados; sin transporte LAN | En progreso |
+| B10 | Partida frente a frente en un solo dispositivo | Pantalla y turnos probados; falta revisión en dispositivo físico | En progreso |
+| B11 | Reto, aceptar/Listo o rechazar/shot desde cada lado | Flujo implementado con catálogo inicial; catálogo privado posterior | En progreso |
 | B12 | Autorización y acceso Lichess online | Online explícito de la propuesta; prioridad pendiente | Pendiente |
 | B13 | Partida online y ejercicios informativos | Online explícito de la propuesta; prioridad pendiente | Pendiente |
 | B14 | Verificación y entrega del lunes | Núcleo académico/producto o preparación | Pendiente |
@@ -70,26 +74,31 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 
 ### B02 · Base Flutter Android
 
+> Avance incorporado: main/app, Auth y permiso INTERNET en 536ee10; lockfile versionado y dependencias en el merge. SDK compatible, análisis, 24 pruebas y arranque real Edge/Wasm con Supabase comprobados. Lanzador reproducible añadido; falta verificación Android. No repetir la separación main/app ni el lockfile.
+
 | Campo | Contenido |
 |---|---|
 | Identificador | B02 |
 | Nombre | Base Flutter Android |
 | Objetivo | Validar y completar la base existente en chess_ercise/, sin repetir su generación. |
-| Requisitos previos | Revisión de B01 y aprobación de la parte a continuar; Android confirmado; acordar SDK con el compañero antes de resolver dependencias. |
+| Requisitos previos | Revisión de B01 y aprobación de la parte a continuar; Android confirmado; conservar SDK compatible con ^3.13.5 y lockfile del equipo. |
 | Archivos involucrados | chess_ercise/pubspec.yaml y lock, android/, analysis_options.yaml, lib/main.dart, futuro lib/app.dart, prueba de arranque e ignores pertinentes. |
 | Conceptos Flutter | flutter create, runApp, MaterialApp, Scaffold y análisis de clase 5. |
-| Pasos | 1. Aprovechar commit 0b0c221 y confirmar SDK común: el proyecto exige ^3.13.5, el equipo local tiene 3.12.2. 2. Tras autorizar la solución, comprobar SDK/dispositivos y resolver dependencias. 3. Validar contador existente. 4. Separar raíz/pantalla con el método del profesor. 5. Revisar lockfile/ignore y reproducibilidad Android. 6. Registrar pruebas/arranque reales; no desarrollar plataformas extra. |
+| Pasos | 1. Conservar base y main/app recibidos. 2. SDK local 3.13.7 compatible y dependencias resueltas sin cambiar lockfile. 3. Análisis y 24 pruebas pasaron. 4. Arranque real en navegador con Supabase documentado en 09. 5. Completar comprobación Android y registrar resultados. |
 | Pruebas | flutter doctor -v, flutter devices, analyze, prueba de arranque y run en Android; registrar cada resultado real. |
 | Criterio de aceptación | App base arranca en objetivo, archivos previos conservados y resolución de dependencias reproducible. |
 | Estado | En progreso |
 
 | Parte | Foco y mensaje de commit sugerido para el usuario |
 |---|---|
-| B02.01 · estructura y SDK | Estructura ya aportada en 0b0c221. Falta alinear y validar SDK; sugerencia para una corrección realmente implementada: `chore(flutter): unificar entorno de la base existente` |
-| B02.02 · arranque | `feat(app): separar raíz y pantalla inicial` |
-| B02.03 · ignore | `chore(git): ajustar archivos versionables de Flutter Android` |
+| B02.01 · estructura y SDK | Estructura ya aportada en 0b0c221; SDK local compatible comprobado. No repetir generación ni actualizar SDK sin necesidad. |
+| B02.02 · arranque | Incorporado en 536ee10; verificar arranque, no repetir el cambio de main/app |
+| B02.03 · ignore | Lockfile conservado durante resolución; JSON local ignorado; falta comprobación Android. |
+| B02.04 · ejecución sin emulador | Main real en Edge/Wasm con Supabase; sugerencia: `chore(dev): ejecutar ChessErcise real en Edge sin emulador` |
 
 ### B03 · Compatibilidad, motor y tablero
+
+> Avance incorporado: chessground/dartchess y TableroWidget para puzzle. No agregar de nuevo las dependencias por comenzar este bloque. AjedrezService general y sus contratos de captura/partida aun no existen; validar y adaptar lo ya recibido.
 
 | Campo | Contenido |
 |---|---|
@@ -102,7 +111,7 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 | Pasos | 1. Resolver versiones compatibles sin actualizar SDK por defecto. 2. Crear adaptador de reglas. 3. Integrar widget de tablero y liberar controlador. 4. Verificar legales/promoción/final. 5. Dejar una prueba aislada del conjunto antes de red. |
 | Pruebas | Resolución/build Android; captura normal/en passant; enroque y promoción; movimiento inválido sin mutación; mate/ahogado; entrada por toque y orientación. |
 | Criterio de aceptación | La integración real compila y el adaptador devuelve eventos correctos. Metadata compatible sola no basta; no reescribir tablero nativo si el paquete funciona. |
-| Estado | Pendiente |
+| Estado | En progreso |
 
 | Parte | Foco y mensaje de commit sugerido para el usuario |
 |---|---|
@@ -112,18 +121,20 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 
 ### B04 · Acceso real y menú de modos
 
+> Las partes de configuracion, formulario y estado ya tienen implementacion en 536ee10. Los mensajes de commit de abajo son la intencion original, no una orden de repetir commits. Continuar con pruebas reales y correcciones concretas, incluida documentacion de parametros de ejecucion.
+
 | Campo | Contenido |
 |---|---|
 | Identificador | B04 |
 | Nombre | Acceso real y menú de modos |
 | Objetivo | Implementar registro/ingreso/salida con Supabase y navegación fiel al diseño. |
-| Requisitos previos | B03 completo, proyecto Supabase creado, aprobación de avance. |
+| Requisitos previos | B02 validable con SDK compatible, proyecto Supabase identificado y aprobación de la parte. El código de acceso ya está incorporado; no requiere rehacer el tablero para probar Auth. |
 | Archivos involucrados | config/app_config.dart, main/app, providers/auth_provider.dart, screens/auth/ y home/, pubspec/lock y pruebas pertinentes. |
 | Conceptos Flutter | Form/validator, controladores/dispose, setState del ojo y Provider de clase 6; AuthGate clase 7. |
 | Pasos | 1. Agregar provider y supabase_flutter con explicación. 2. Inicializar proyecto correcto. 3. Crear formulario/s y confirmación de correo. 4. Conectar acciones Auth reales. 5. Crear menú y ámbito privado. 6. Limpiar rutas al salir. |
 | Pruebas | Inválidos y doble envío; fallos de red; registro/confirmación/ingreso/salida reales; restauración y Atrás sin mostrar sesión anterior. |
 | Criterio de aceptación | Las tres acciones Auth funcionan con el proyecto real y la UI se recupera de errores. No modificar confirmación de correo por comodidad sin acordarlo. |
-| Estado | Pendiente |
+| Estado | En progreso |
 
 | Parte | Foco y mensaje de commit sugerido para el usuario |
 |---|---|
@@ -175,18 +186,20 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 
 ### B07 · API del puzzle, tarjeta y detalle
 
+> API/modelo/pantalla y detalle fueron incorporados desde 18cf1f2; hay FutureBuilder, Hero y animacion implicita. No recrear las partes: ejecutar pruebas y validar Android/API real antes de cerrar el bloque.
+
 | Campo | Contenido |
 |---|---|
 | Identificador | B07 |
 | Nombre | API del puzzle, tarjeta y detalle |
 | Objetivo | Cubrir API deportiva y navegación/animaciones con una función explícita del producto. |
-| Requisitos previos | B06 completo y aprobación de avance. |
+| Requisitos previos | SDK/base B02 compatibles y raíz de sesión disponible para prueba integrada; aprobación de la parte. B06 no es dependencia técnica de la API diaria; el código B07 ya está incorporado. |
 | Archivos involucrados | models/puzzle_diario.dart, data/lichess_puzzles_service.dart, providers/puzzles_provider.dart, screens/puzzles/; Dio en pubspec/lock. |
 | Conceptos Flutter | Dio/modelo/FutureBuilder de clase 7; constructor/Hero/animación implícita de clase 6. |
 | Pasos | 1. Consultar endpoint diario real. 2. Convertir JSON tipado. 3. Conservar Future fuera de build. 4. Mostrar tarjeta y estados. 5. Abrir detalle pasando el objeto. 6. Incorporar Hero e implícita visibles. |
 | Pruebas | Respuesta real y formato inesperado; carga/error/vacío/reintento; reconstrucción no duplica solicitudes; detalle recibe objeto y animaciones correctas. |
 | Criterio de aceptación | API real visible mediante FutureBuilder y navegación/animaciones académicas cubiertas. Resolver puzzle pertenece a B08. |
-| Estado | Pendiente |
+| Estado | En progreso |
 
 | Parte | Foco y mensaje de commit sugerido para el usuario |
 |---|---|
@@ -196,18 +209,20 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 
 ### B08 · Resolver puzzle y confirmar ejercicio
 
+> Posicion, solucion, pistas, historial, rendicion, cache y resumen ya tienen codigo. Conservar PuzzleController y PuzzlesProvider; SharedPreferences es un complemento local. La parte de ejercicio por fallo/Listo sigue pendiente y el resumen lo anuncia como Proximamente.
+
 | Campo | Contenido |
 |---|---|
 | Identificador | B08 |
 | Nombre | Resolver puzzle y confirmar ejercicio |
 | Objetivo | Convertir PGN/inicio/solución en una experiencia jugable y penalización por fallo. |
-| Requisitos previos | B07 y B03 completos, aprobación de avance; regla de ejercicio al fallar acordada. |
+| Requisitos previos | Para validar resolución: B07 y tablero/motor disponibles con SDK compatible. Para completar ejercicios: catálogo B06 y regla de fallo acordada. Aprobación de la parte; conservar resolución/guardado ya incorporados. |
 | Archivos involucrados | logic/puzzle_service.dart, estado de puzzle/provider, pantalla de resolución y panel Listo; pruebas con puzzle conocido. |
 | Conceptos Flutter | Estado, callbacks y composición del curso; secuencia UCI/PGN como complemento. |
 | Pasos | 1. Reconstruir posición y turno exactos. 2. Probar secuencia conocida. 3. Comparar jugada del usuario con solución y representar respuesta. 4. Mostrar acierto/fallo/final. 5. Asociar ejercicio al fallo y permitir Listo. 6. Reiniciar sin conservar eventos anteriores. |
 | Pruebas | Posición/primer turno correctos; legal pero incorrecta detectada; secuencia acertada; fallo único; Listo no duplica; reinicio; no filtrar solución al usuario. |
 | Criterio de aceptación | Puzzle diario se puede resolver y fallar de forma verificable; ejercicio se confirma manualmente sin sensores. |
-| Estado | Pendiente |
+| Estado | En progreso |
 
 | Parte | Foco y mensaje de commit sugerido para el usuario |
 |---|---|
@@ -215,7 +230,7 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 | B08.02 · solucion | `feat(puzzles): validar secuencia y resultado` |
 | B08.03 · ejercicio | `feat(puzzles): resolver penalización con Listo` |
 
-### B09 · Transporte LAN y sala host/cliente
+### B09 · Antecedente LAN sustituido; consultar el documento 10
 
 | Campo | Contenido |
 |---|---|
@@ -236,7 +251,7 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 | B09.02 · cliente | `feat(lan): conectar invitado por IP y puerto` |
 | B09.03 · cierre | `feat(lan): gestionar errores y liberar conexiones` |
 
-### B10 · Partida de ajedrez sincronizada
+### B10 · Antecedente sincronizado sustituido; consultar el documento 10
 
 | Campo | Contenido |
 |---|---|
@@ -257,7 +272,7 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 | B10.02 · sincronizacion | `feat(lan): sincronizar jugadas confirmadas` |
 | B10.03 · final | `feat(game): representar turnos y finales en ambos jugadores` |
 
-### B11 · Elegir castigo y confirmar Listo en LAN
+### B11 · Antecedente de retos LAN sustituido; consultar el documento 10
 
 | Campo | Contenido |
 |---|---|
@@ -348,12 +363,12 @@ No ejecutar `git add`, commit, push, reset o cambios de rama. Muchos commits peq
 | CRUD privado | Cuatro operaciones persistidas y denegaciones A/B/sin sesión en servidor | B05–B06 |
 | API, constructor y animaciones | Puzzle real con FutureBuilder; tarjeta→detalle con objeto, Hero e implícita | B07 |
 | Puzzle jugable | Posición/turno/solución correctos y ejercicio al fallar confirmado con Listo | B08 |
-| LAN | Dos Android en misma Wi-Fi, host/cliente y partida sincronizada | B09–B10 |
+| Local | Dos personas frente a frente en un dispositivo; tablero fijo, toques y paneles orientados | B09–B10; documento 10 |
 | Desafíos | El rival elige, el afectado confirma, una captura no se duplica | B11 |
 | Online | Cuentas y partida Lichess, stream/jugadas/relojes reales; si se posterga, aprobación expresa | B12–B13 |
 | Aprendizaje y Git | Explicación por función/parte, mensajes sugeridos y aportes reales de ambos | Transversal, B14 |
 
-La estructura y el test de contador existen, pero las pruebas/ejecución de aplicación siguen **no ejecutadas en esta revisión** por el bloqueo de SDK. La comprobación directa de Dart confirmó 3.12.2. Consultar fuentes o disponer de un test escrito no completa sus bloques funcionales.
+El contador fue reemplazado por acceso y puzzle. Las **24 pruebas** de los cuatro archivos ya se ejecutaron y aprobaron con Dart 3.13.7, y el análisis terminó sin incidencias. El servidor Supabase respondió HTTP 200 y el formulario real abrió en navegador; no se inició sesión con credenciales ni se probó Android/LAN. No dar todos los bloques por completos con esa evidencia parcial.
 
 ## 5. Comandos futuros y límites
 

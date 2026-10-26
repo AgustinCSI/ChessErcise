@@ -1,5 +1,7 @@
 # 07 · Revisión del avance aportado por el equipo
 
+> Revisión histórica anterior al merge del puzzle. El código en main ya cambió con bdda951; el estado vigente está en [08_revision_merge_bdda951.md](08_revision_merge_bdda951.md). Las afirmaciones siguientes sobre “solo contador” describen la referencia cdaaecd inspeccionada entonces, no el contenido actual.
+
 Fecha: 25 de octubre de 2026. Referencia inspeccionada: `cdaaecd3b90bc77ac36e26ce1b522d21f0e202b2`. Resultado: **base Flutter generada, B02 parcial; funcionalidades de ChessErcise pendientes**.
 
 ## 1. Alcance de esta revisión

@@ -5,6 +5,7 @@
 # Documentacion interna de bloques de trabajo
 /docs/bloques/
 
+iniciar_app.cmd
 *.class
 *.lock
 *.log

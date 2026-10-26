@@ -1,8 +1,8 @@
 # 02 · Requisitos y alcance de ChessErcise
 
-Revisión: 24 de octubre de 2026. Sustituye las suposiciones del 23 de octubre sobre un solo dispositivo, ranking como función principal de API y puzzle como extra. Estado: alcance aclarado por el equipo; prioridad de entrega de online pendiente de confirmar.
+Revisión vigente: 25 de octubre de 2026. El usuario reemplazó LAN por local en un dispositivo y confirmó trabajar primero en local, después online. Las referencias a LAN en fuentes originales son antecedentes. Puzzle y requisitos académicos permanecen.
 
-Actualización de avance del 25-10-2026: el compañero aportó la base en `chess_ercise/`, que solo contiene el contador Flutter y su prueba. Los requisitos siguientes no cambian; su estado verificado está en [07_revision_avance_2026_10_25.md](07_revision_avance_2026_10_25.md). No confundir creación de la estructura con implementación de los modos de juego.
+Tras bdda951 se incorporaron acceso Supabase y puzzle con tablero/progreso/resumen. Posteriormente se implementó local frente a frente, se reutilizó el tablero y pasaron análisis y 38 pruebas. CRUD privado, rutina del puzzle y online siguen pendientes. [Alcance vigente y límites](10_multijugador_local_un_dispositivo.md); [revisión histórica del merge](08_revision_merge_bdda951.md).
 
 ## 1. Fuentes y autoridad de cada requisito
 
@@ -20,20 +20,20 @@ La propuesta y los mockups ahora están disponibles en el repositorio. El diagn�
 
 La propuesta busca combinar el hobby del ajedrez con actividad física e interacción social. Describe a Erick, de 23 años, interesado en divertirse mientras hace ejercicio. Su explicación sobre estrés es una motivación declarada por los autores, no un resultado de salud comprobado por esta auditoría.
 
-El objetivo es jugar partidas válidas, asociar pérdidas de piezas a ejercicios elegidos por el oponente y ofrecer un puzzle diario. El modo LAN utiliza dos Android: uno aloja la partida y otro se conecta por la misma red. El modo online utiliza la plataforma Lichess y es una integración distinta.
+El objetivo es jugar partidas válidas, asociar pérdidas de piezas a ejercicios elegidos por el oponente y ofrecer un puzzle diario. Por el cambio explícito del usuario del 25-10, el modo local utiliza un celular o tablet entre ambas personas; reemplaza el diseño Wi-Fi anterior. Primero se revisa local y luego online con Lichess. [Alcance e implementación vigentes](10_multijugador_local_un_dispositivo.md).
 
 ## 3. Decisiones actualizadas
 
 | ID | Estado | Decisión y efecto |
 |---|---|---|
-| D01 | Confirmada | Dos dispositivos en LAN Wi-Fi, uno host y otro cliente. Se descarta la propuesta anterior de compartir un teléfono. No confundir LAN con online por Internet |
-| D02 | Confirmada | Android únicamente. No crear ni probar iOS o web |
+| D01 | Sustituida por el usuario el 25-10 | Dos personas en un solo celular/tablet, frente a frente y sin mover el dispositivo. Reemplaza host/cliente Wi-Fi. Primero local y después online; ver documento 10 |
+| D02 | Confirmada | Android como entrega; sin iOS. Navegador autorizado posteriormente como ejecución de desarrollo sin emulador |
 | D03 | Criterio confirmado; validación técnica pendiente | Escoger versiones compatibles y la solución más simple. Revisar chessground + dartchess y web_socket_channel, ya propuestos por el equipo. No confundir documentación compatible con resolución/build comprobados |
-| D04 | Confirmación simple confirmada | El jugador declara «Listo» tras hacer ejercicio. La propuesta añade selección por el rival según valor de pieza y aceptar/rechazar; mantener esos requisitos y confirmar el detalle de rechazo. Sin verificación física avanzada |
+| D04 | Confirmada y ampliada el 25-10 | El capturador elige reto; el retado acepta y marca «Listo» o rechaza y ve animación «Tomar shot», desde su perspectiva. Sin verificación física avanzada |
 | D05 | Preparación recomendada ahora | Hay acceso al panel y una organización Free; en la inspección del 24-10 su lista de proyectos estaba vacía. Preparar el proyecto de ChessErcise antes de Auth; tablas durante su bloque. Ver [preparación Supabase](06_preparacion_supabase.md) |
 | D06 | Confirmada por el usuario | Presentación el lunes **26 de octubre de 2026**. La propuesta indica sección 1. No hay rúbrica adicional disponible; si llega, conciliar sin inventar criterios |
 
-La pregunta sobre priorizar LAN+puzzle+requisitos académicos frente a mantener también online para el lunes sigue pendiente. **Online y puzzle son requisitos explícitos de la propuesta; no se eliminan ni se declaran opcionales unilateralmente.**
+El usuario confirmó la secuencia: primero local en un dispositivo, después online. **Online y puzzle siguen incluidos**; esa secuencia no certifica una fecha de entrega de funciones pendientes.
 
 ## 4. Funcionalidades y trazabilidad
 
@@ -41,9 +41,9 @@ P0-exp = funcionalidad core explícita del documento; P0-acad = mínimo del curs
 
 | ID | Función | Prioridad/origen | Dificultad | Dependencias | Bloque vigente |
 |---|---|---|---|---|---|
-| RF01 | Partida LAN host/cliente en misma Wi-Fi | P0-exp, propuesta §6 y D01 | Alta | Dos Android, transporte y motor | B03, B09–B11 |
+| RF01 | Partida local en un dispositivo, con dos perspectivas fijas | Cambio explícito del usuario, D01 | Media | Tablero compartido, motor y zonas orientadas | B03, B09–B11 |
 | RF02 | Captura permite al oponente elegir ejercicio según valor de pieza | P0-exp, propuesta §6; PDF pp. 10/12 | Media/alta | Catálogo, captura, sincronización | B06, B10–B11 |
-| RF03 | Aceptar/rechazar castigo en LAN | P0-exp, propuesta §6; PDF p. 13 | Media | Definir rechazo y estados | B11 |
+| RF03 | Aceptar/rechazar reto desde cada lado; animación Tomar shot al rechazar | Cambio explícito del usuario; PDF p. 13 como antecedente | Media | Captura y fases locales | B11 |
 | RF04 | Confirmar «Listo» sin comprobación física | Confirmado por usuario, D04 | Baja en UI; media en sincronización | Desafío pendiente y participante correcto | B08, B11 |
 | RF05 | Partida online con cuentas Lichess | P0-exp, propuesta §6; PDF pp. 9/10 | Alta | Autorización Lichess, API Board y dos cuentas | B12–B13 |
 | RF06 | Puzzle diario Lichess con ejercicio al fallar | P0-exp, propuesta §6; PDF p. 8 | Media/alta | API pública, PGN/posición y solución | B07–B08 |
@@ -66,7 +66,7 @@ Se retira la recomendación de un ranking como sección adicional: la API del pu
 
 El **alcance completo documentado** incluye LAN, online, puzzle y mínimos académicos. El plan mantiene bloques para todo ello.
 
-La **prioridad recomendada, todavía pendiente de aceptación**, es terminar primero Android + Auth + CRUD/RLS + puzzle + LAN con ejercicios, y abordar después online Lichess. Así se demuestra primero el núcleo distintivo y el mínimo del curso. Postergar online requiere decisión explícita del equipo: no se presenta una entrega parcial como cumplimiento completo de la propuesta.
+La secuencia confirmada es implementar y revisar primero local en un dispositivo, y después online Lichess. Auth, CRUD/RLS, puzzle y validación Android continúan como requisitos; implementar local no implica haber completado toda la propuesta.
 
 No se promete que catorce bloques quepan en el tiempo disponible. Los puntos de mayor incertidumbre son prueba LAN en dos teléfonos y autorización/stream de partidas online. Deben verificarse temprano; si fallan, se informa y se ajusta alcance con el usuario, sin sustituir LAN por juego en un teléfono.
 
@@ -79,13 +79,13 @@ No se promete que catorce bloques quepan en el tiempo disponible. Los puntos de 
 | Menú con Online / Local / Puzzle y acceso a perfil | PDF p. 7 | Conservar destinos; perfil completo no equivale a un requisito implementado |
 | Crear/unirse a sala LAN | D01 y propuesta; no dibujado en detalle | Añadir pantalla mínima host/cliente, IP/puerto y estado de conexión |
 | Tablero y selección de penalización | PDF pp. 9–12 | Adaptar chessground dentro de pantalla Flutter; distinguir quién puede elegir |
-| Aceptar/rechazar y después «Listo» | PDF p. 13 y D04 | Confirmación manual; resultado de rechazo pendiente de concretar |
+| Aceptar/rechazar y después «Listo» | PDF p. 13 y D04 actualizado | Confirmación manual; rechazo muestra animación Tomar shot y Continuar |
 | Puzzle diario | PDF p. 8 | Cargar API; tarjeta/detalle propuesta para cubrir navegación académica; resolver sobre tablero |
 | Mis ejercicios y formulario | Mínimo académico y RP01 | Vista complementaria necesaria para CRUD, sin reemplazar los modos del mockup |
 
 Relojes, rendición, oferta de tablas y navegación de jugadas aparecen en el diseño. Deben asignarse a entregables concretos antes de implementarlos; no se consideran automáticamente extras ni terminados por dibujarlos. Género y fecha de nacimiento aparecen en registro: confirmar su necesidad antes de agregar almacenamiento o validaciones. Nombre de usuario se puede representar inicialmente en metadatos Auth; no se presupone una segunda tabla.
 
-La propuesta contiene alternativa de «tomar un trago» al rechazar en LAN. Se registra fielmente como requisito aportado, sin recomendaciones de consumo. Debe acordarse si se conserva ese texto/acción o solo se registra rechazo. La instrucción «Listo» no resuelve por sí sola esa elección.
+El usuario confirmó la animación «Tomar shot» al rechazar el reto local. Se implementa como mensaje animado con confirmación para continuar, sin verificación de consumo.
 
 ## 7. Datos y separación de sistemas
 
@@ -115,7 +115,7 @@ Cada parte documentará sus funciones, entradas, salidas, cambios de estado y fr
 
 1. Completar el proyecto Supabase en la organización verificada; no hace falta conectar ningún repositorio.
 2. Confirmar si online se entrega el lunes o se posterga expresamente.
-3. Acordar rechazo del desafío, asociación valor→ejercicios y campos de perfil/registro.
+3. Revisar el catálogo provisional valor→ejercicios; el rechazo ya se confirmó como animación Tomar shot. Perfil/registro se coordina con el compañero.
 4. Aceptar el reordenamiento de bloques antes de iniciar código Flutter.
 5. Probar compatibilidad real de los tres paquetes y LAN en dos Android al comenzar sus bloques.
 

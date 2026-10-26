@@ -2,7 +2,7 @@
 
 Fecha: 24 de octubre de 2026. **Recomendación: preparar el proyecto y su acceso ahora; integrar Auth temprano y crear tablas por bloque.** No posponer toda la conexión hasta el final.
 
-Actualización documental del 25-10: ahora hay base Flutter en `chess_ercise/`, todavía sin supabase_flutter o autenticación. El estado externo del panel que se describe abajo corresponde a la inspección del día 24 y no se volvió a verificar en la revisión de Git del día 25; no supone que el usuario no haya creado el proyecto después.
+Actualización del 25-10 tras bdda951: ya hay supabase_flutter, inicialización, AuthProvider, formulario y AuthGate en `chess_ercise/`. Con Flutter 3.47.8/Dart 3.13.7 se abrió el ingreso real usando el archivo supabase.local.json del usuario; Auth settings respondió HTTP 200. No se inició sesión ni se crearon cuentas. El estado externo del panel descrito abajo corresponde a la inspección del día 24; queda como registro histórico. [Evidencia de ejecución](09_ejecucion_local_sin_emulador.md).
 
 ## 1. Preparar ahora no significa implementar todo ahora
 
@@ -80,7 +80,7 @@ Usar un mecanismo simple y explicado, siguiendo clase 7; parámetros de compilac
 | Formulario correcto con nombre ChessErcise | Preparado; no enviado por el agente |
 | Proyecto PostgreSQL creado y disponible | No verificado; requiere completar creación |
 | Conector Supabase conectado | No verificado; opcional si se usa navegador |
-| SDK Supabase inicializado en Flutter | No ejecutado; la base recibida en chess_ercise aún no declara supabase_flutter |
+| SDK Supabase inicializado en Flutter | Main real ejecutado en navegador con JSON local; pantalla de ingreso visible y Auth settings HTTP 200; sin sesión de usuario probada |
 | Registro/ingreso/salida reales | No ejecutados |
 | Tablas, RLS y CRUD | No creados ni ejecutados |
 | Vinculación GitHub | No realizada; innecesaria para comenzar |
