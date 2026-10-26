@@ -11,6 +11,24 @@ class RetoLocal {
   final String indicacion;
   final int valor;
 
+  // El sufijo del ID indica el valor de la pieza; la ilustración es la misma.
+  String get imagen {
+    final ejercicio = id.replaceFirst(RegExp(r'-\d+$'), '');
+    final archivo = switch (ejercicio) {
+      'flexiones' => 'FlexionesBrazos',
+      'flexiones-rodillas' => 'FlexionesRodillasApoyadas',
+      'abdominales' => 'AbdominalesTradicionales',
+      'plancha-frontal' => 'PlanchaFrontal',
+      'plancha-lateral' => 'PlanchaLateral',
+      'sentadillas' => 'Sentadilla',
+      'zancadas' => 'Zancada',
+      'rodillas-pecho' => 'rodillasPecho',
+      'trote' => 'TroteEnLugar',
+      _ => 'FlexionesBrazos',
+    };
+    return 'assets/IconosDeportes/$archivo.png';
+  }
+
   static const catalogo = <({String id, String titulo, bool porTiempo})>[
     (id: 'flexiones', titulo: 'Flexiones de brazos', porTiempo: false),
     (

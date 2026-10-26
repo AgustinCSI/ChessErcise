@@ -113,15 +113,29 @@ class _PartidaLocalScreenState extends State<PartidaLocalScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          TableroInteractivo(
-                            size: size,
-                            posicion: _partida.posicion,
-                            jugador: _partida.posicion.turn,
-                            orientacion: Side.white,
-                            frenteAFrente: true,
-                            ultimaJugada: _partida.ultimaJugada,
-                            puedeMover: _partida.puedeMover,
-                            onMove: _partida.jugar,
+                          Stack(
+                            children: [
+                              TableroInteractivo(
+                                size: size,
+                                posicion: _partida.posicion,
+                                jugador: _partida.posicion.turn,
+                                orientacion: Side.white,
+                                frenteAFrente: true,
+                                ultimaJugada: _partida.ultimaJugada,
+                                puedeMover: _partida.puedeMover,
+                                onMove: _partida.jugar,
+                              ),
+                              // El velo solo cubre el tablero; cada jugador
+                              // conserva su panel orientado y sus acciones.
+                              if (!_partida.puedeMover &&
+                                  _partida.fase != FaseLocal.finalizada)
+                                Positioned.fill(
+                                  child: ColoredBox(
+                                    key: const ValueKey('velo-reto-local'),
+                                    color: Colors.black.withValues(alpha: .58),
+                                  ),
+                                ),
+                            ],
                           ),
                           const SizedBox(height: 8),
                           Expanded(

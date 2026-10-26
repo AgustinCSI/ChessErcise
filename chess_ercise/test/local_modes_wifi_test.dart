@@ -11,13 +11,15 @@ import 'package:chess_ercise/presentation/theme/app_theme.dart';
 import 'package:chess_ercise/presentation/widgets/tablero_interactivo.dart';
 import 'package:chess_ercise/presentation/widgets/tira_jugadas.dart';
 import 'package:chessground/chessground.dart';
+import 'package:dartchess/dartchess.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Transporte de prueba para aislar la UI; los sockets reales se prueban aparte.
 class TransporteGuion extends LanTransporte {
-  TransporteGuion({this.reto = false});
+  TransporteGuion({this.reto = false, this.elegido = true});
   final bool reto;
+  final bool elegido;
   final comandos = <Map<String, dynamic>>[
     {'tipo': 'mover', 'uci': 'e2e4', 'actor': 'white', 'opciones': <String>[]},
     {'tipo': 'mover', 'uci': 'e7e5', 'actor': 'black', 'opciones': <String>[]},
@@ -58,14 +60,20 @@ class TransporteGuion extends LanTransporte {
             'actor': 'white',
             'opciones': ['sentadillas-1', 'flexiones-1'],
           },
-          {'tipo': 'elegir', 'id': 'sentadillas-1', 'actor': 'white'},
+          if (elegido)
+            {'tipo': 'elegir', 'id': 'sentadillas-1', 'actor': 'white'},
         ]);
     } else if (mensaje['tipo'] == 'orden') {
       comandos.add({
         ...mensaje['orden'] as Map<String, dynamic>,
         'actor': 'black',
+        if (mensaje['orden']['tipo'] == 'mover') 'opciones': <String>[],
       });
     }
+    publicar();
+  }
+
+  void publicar() {
     scheduleMicrotask(
       () => onMensaje?.call(
         jsonEncode({
@@ -83,7 +91,131 @@ class TransporteGuion extends LanTransporte {
   Future<void> cerrar() async {}
 }
 
+Future<void> avanzarWifi(WidgetTester tester) async {
+  await tester.pump();
+  if (find.byKey(const ValueKey('punto-espera-0')).evaluate().isNotEmpty) {
+    await tester.pump(const Duration(milliseconds: 1100));
+  } else {
+    await tester.pumpAndSettle();
+  }
+}
+
 void main() {
+  testWidgets('Espera de reto permite revisar sin actuar por el rival', (
+    tester,
+  ) async {
+    final transporte = TransporteGuion(reto: true, elegido: false);
+    final lan = PartidaLanController(transporte: transporte);
+    addTearDown(lan.dispose);
+    await lan.unirse('Luis', '192.168.1.5:45000/123456');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.claro,
+        home: PartidaWifiScreen(lan: lan),
+      ),
+    );
+    await avanzarWifi(tester);
+    expect(find.text('Aceptar reto'), findsNothing);
+    expect(find.text('Sentadillas · 1 repetición'), findsNothing);
+    expect(find.byType(Dialog), findsNothing);
+    await tester.tap(find.byTooltip('1. e4'));
+    await avanzarWifi(tester);
+    final historica = lan.partida.posicionEn(1).fen;
+    transporte.comandos.add({
+      'tipo': 'elegir',
+      'id': 'sentadillas-1',
+      'actor': 'white',
+    });
+    transporte.publicar();
+    await avanzarWifi(tester);
+    expect(find.text('Aceptar reto'), findsOneWidget);
+    expect(
+      tester
+          .widget<TableroInteractivo>(find.byType(TableroInteractivo))
+          .posicion
+          .fen,
+      historica,
+    );
+    await tester.ensureVisible(find.text('Rechazar'));
+    await tester.tap(find.text('Rechazar'));
+    await avanzarWifi(tester);
+    expect(find.text('Tomar shot'), findsOneWidget);
+    await tester.ensureVisible(find.text('Continuar'));
+    await tester.tap(find.text('Continuar'));
+    await avanzarWifi(tester);
+    expect(find.text('Volver a la partida'), findsOneWidget);
+    expect(lan.puedeMover, isTrue);
+    expect(
+      tester
+          .widget<TableroInteractivo>(find.byType(TableroInteractivo))
+          .puedeMover,
+      isFalse,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Revision conserva posicion al recibir la jugada del rival', (
+    tester,
+  ) async {
+    final transporte = TransporteGuion();
+    final lan = PartidaLanController(transporte: transporte);
+    addTearDown(lan.dispose);
+    await lan.unirse('Luis', '192.168.1.5:45000/123456');
+    lan.jugar(Move.parse('b8c6')!);
+    await tester.pump();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.claro,
+        home: PartidaWifiScreen(lan: lan),
+      ),
+    );
+    await avanzarWifi(tester);
+    expect(lan.puedeMover, isFalse);
+    await tester.tap(find.byTooltip('1. e4'));
+    await avanzarWifi(tester);
+    final historica = lan.partida.posicionEn(1).fen;
+    transporte.comandos.add({
+      'tipo': 'mover',
+      'uci': 'f1b5',
+      'actor': 'white',
+      'opciones': <String>[],
+    });
+    transporte.publicar();
+    await avanzarWifi(tester);
+    expect(lan.puedeMover, isTrue);
+    final tablero = tester.widget<TableroInteractivo>(
+      find.byType(TableroInteractivo),
+    );
+    expect(tablero.posicion.fen, historica);
+    expect(tablero.puedeMover, isFalse);
+    expect(find.text('Jugada 1 de 5'), findsOneWidget);
+    await tester.tap(find.byTooltip('Jugada siguiente'));
+    await avanzarWifi(tester);
+    expect(
+      tester
+          .widget<TableroInteractivo>(find.byType(TableroInteractivo))
+          .posicion
+          .fen,
+      lan.partida.posicionEn(2).fen,
+    );
+    await tester.tap(find.text('Volver a la partida'));
+    await avanzarWifi(tester);
+    expect(
+      tester
+          .widget<TableroInteractivo>(find.byType(TableroInteractivo))
+          .posicion
+          .fen,
+      lan.partida.posicion.fen,
+    );
+    expect(
+      tester
+          .widget<TableroInteractivo>(find.byType(TableroInteractivo))
+          .puedeMover,
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Selector ofrece dos cuadros y conserva frente a frente', (
     tester,
   ) async {
@@ -93,12 +225,12 @@ void main() {
     expect(find.text('Frente a frente'), findsOneWidget);
     expect(find.text('Local Wi-Fi'), findsOneWidget);
     await tester.tap(find.text('Frente a frente'));
-    await tester.pumpAndSettle();
+    await avanzarWifi(tester);
     expect(find.byType(LocalSetupScreen), findsOneWidget);
     await tester.pageBack();
-    await tester.pumpAndSettle();
+    await avanzarWifi(tester);
     await tester.tap(find.text('Local Wi-Fi'));
-    await tester.pumpAndSettle();
+    await avanzarWifi(tester);
     expect(find.byType(WifiLobbyScreen), findsOneWidget);
     expect(find.text('Crear sala'), findsOneWidget);
     expect(find.text('Unirme a una sala'), findsOneWidget);
@@ -116,12 +248,12 @@ void main() {
           home: PartidaWifiScreen(lan: lan),
         ),
       );
-      await tester.pumpAndSettle();
+      await avanzarWifi(tester);
       expect(find.byType(TiraJugadas), findsOneWidget);
       final actual = lan.partida.posicion.fen;
       expect(lan.puedeMover, isTrue);
       await tester.tap(find.byTooltip('1. e4'));
-      await tester.pumpAndSettle();
+      await avanzarWifi(tester);
       expect(
         tester
             .widget<TableroInteractivo>(find.byType(TableroInteractivo))
@@ -139,7 +271,7 @@ void main() {
       );
       expect(lan.partida.posicion.fen, actual);
       await tester.tap(find.text('Volver a la partida'));
-      await tester.pumpAndSettle();
+      await avanzarWifi(tester);
       expect(
         tester
             .widget<Chessboard>(find.byType(Chessboard))
@@ -152,30 +284,51 @@ void main() {
     },
   );
 
-  testWidgets(
-    'Reto Wi-Fi reutiliza el panel y cierra el diálogo al confirmar',
-    (tester) async {
-      final lan = PartidaLanController(transporte: TransporteGuion(reto: true));
-      addTearDown(lan.dispose);
-      await lan.unirse('Luis', '192.168.1.5:45000/123456');
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.claro,
-          home: PartidaWifiScreen(lan: lan),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(Dialog), findsOneWidget);
-      await tester.tap(find.text('Aceptar reto'));
-      await tester.pumpAndSettle();
-      expect(find.text('Listo'), findsOneWidget);
-      await tester.tap(find.text('Listo'));
-      await tester.pumpAndSettle();
-      expect(find.byType(Dialog), findsNothing);
-      expect(lan.puedeMover, isTrue);
-      expect(tester.takeException(), isNull);
-    },
-  );
+  testWidgets('Reto Wi-Fi integrado permite revisar y confirmar sin dialogos', (
+    tester,
+  ) async {
+    final lan = PartidaLanController(transporte: TransporteGuion(reto: true));
+    addTearDown(lan.dispose);
+    await lan.unirse('Luis', '192.168.1.5:45000/123456');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.claro,
+        home: PartidaWifiScreen(lan: lan),
+      ),
+    );
+    await avanzarWifi(tester);
+    expect(find.byType(Dialog), findsNothing);
+    expect(find.byKey(const ValueKey('velo-reto-wifi')), findsOneWidget);
+    await tester.tap(find.byTooltip('1. e4'));
+    await avanzarWifi(tester);
+    expect(find.byKey(const ValueKey('velo-reto-wifi')), findsNothing);
+    expect(find.text('Volver a la partida'), findsOneWidget);
+    await tester.ensureVisible(find.text('Aceptar reto'));
+    await tester.tap(find.text('Aceptar reto'));
+    await avanzarWifi(tester);
+    expect(find.text('Listo'), findsOneWidget);
+    await tester.ensureVisible(find.text('Listo'));
+    await tester.tap(find.text('Listo'));
+    await avanzarWifi(tester);
+    expect(find.byType(Dialog), findsNothing);
+    expect(lan.puedeMover, isTrue);
+    // El reto termina, pero revisar no permite mover desde una posicion pasada.
+    expect(
+      tester
+          .widget<TableroInteractivo>(find.byType(TableroInteractivo))
+          .puedeMover,
+      isFalse,
+    );
+    await tester.tap(find.text('Volver a la partida'));
+    await avanzarWifi(tester);
+    expect(
+      tester
+          .widget<TableroInteractivo>(find.byType(TableroInteractivo))
+          .puedeMover,
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   for (final size in [
     const Size(360, 640),
@@ -202,7 +355,7 @@ void main() {
           home: PartidaWifiScreen(lan: lan),
         ),
       );
-      await tester.pumpAndSettle();
+      await avanzarWifi(tester);
       expect(find.byType(TableroInteractivo), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

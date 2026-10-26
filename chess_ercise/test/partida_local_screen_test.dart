@@ -17,6 +17,16 @@ void mover(PartidaLocalController partida, List<String> jugadas) {
   }
 }
 
+// Una espera activa anima continuamente: avanzamos un intervalo acotado.
+Future<void> avanzarInterfaz(WidgetTester tester) async {
+  await tester.pump();
+  if (find.byKey(const ValueKey('punto-espera-0')).evaluate().isNotEmpty) {
+    await tester.pump(const Duration(milliseconds: 1100));
+  } else {
+    await tester.pumpAndSettle();
+  }
+}
+
 void main() {
   testWidgets('Toques de ambos jugadores mueven sobre el tablero fijo', (
     tester,
@@ -42,7 +52,7 @@ void main() {
               (fila + .5) * rect.height / 8,
             ),
       );
-      await tester.pumpAndSettle();
+      await avanzarInterfaz(tester);
     }
 
     await tocar(4, 6); // e2
@@ -65,16 +75,16 @@ void main() {
     );
     await tester.ensureVisible(find.text('Comenzar partida'));
     await tester.tap(find.text('Comenzar partida'));
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     await tester.tap(find.byTooltip('Salir de la partida').last);
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     await tester.tap(find.text('Seguir jugando'));
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     expect(find.byType(PartidaLocalScreen), findsOneWidget);
     await tester.tap(find.byTooltip('Salir de la partida').last);
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     await tester.tap(find.text('Salir'));
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     expect(find.byType(PartidaLocalScreen), findsNothing);
     expect(find.text('Comenzar partida'), findsOneWidget);
     expect(tester.takeException(), isNull);
@@ -89,12 +99,12 @@ void main() {
     await tester.enterText(find.byType(TextFormField).first, '');
     await tester.ensureVisible(find.text('Comenzar partida'));
     await tester.tap(find.text('Comenzar partida'));
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     expect(find.text('Escribe un nombre'), findsOneWidget);
     await tester.enterText(find.byType(TextFormField).first, 'Ana');
     await tester.ensureVisible(find.text('Comenzar partida'));
     await tester.tap(find.text('Comenzar partida'));
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     expect(find.byType(PartidaLocalScreen), findsOneWidget);
     expect(find.text('Ana · Blancas'), findsOneWidget);
   });
@@ -128,7 +138,7 @@ void main() {
       2,
     );
     mover(partida, ['e2e4', 'd7d5', 'e4d5']);
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     var tablero = tester.widget<Chessboard>(find.byType(Chessboard));
     expect(tablero.orientation, Side.white);
     expect(
@@ -136,23 +146,53 @@ void main() {
       PieceOrientationBehavior.opponentUpsideDown,
     );
     expect(tablero.controller.game.playerSide, PlayerSide.none);
+    expect(find.byKey(const ValueKey('velo-reto-local')), findsOneWidget);
+    final punto = find.byKey(const ValueKey('punto-espera-0'));
+    final posicionAntes = tester
+        .widget<Transform>(punto)
+        .transform
+        .getTranslation()
+        .y;
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(
+      tester.widget<Transform>(punto).transform.getTranslation().y,
+      isNot(closeTo(posicionAntes, .01)),
+    );
+    final ilustraciones = tester
+        .widgetList<Image>(find.byType(Image))
+        .where(
+          (imagen) =>
+              imagen.image is AssetImage &&
+              (imagen.image as AssetImage).assetName.startsWith(
+                'assets/IconosDeportes/',
+              ),
+        );
+    expect(ilustraciones.length, 2);
+    expect(
+      ilustraciones
+          .map((imagen) => (imagen.image as AssetImage).assetName)
+          .toSet(),
+      partida.opciones.map((reto) => reto.imagen).toSet(),
+    );
     expect(find.text('Aceptar reto'), findsNothing);
     final opcion = partida.opciones.first;
     final elegir = find.text('${opcion.titulo} · ${opcion.indicacion}');
     await tester.ensureVisible(elegir);
     await tester.tap(elegir);
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     final aceptar = find.text('Aceptar reto');
     await tester.ensureVisible(aceptar);
     await tester.tap(aceptar);
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     expect(partida.fase, FaseLocal.ejercicio);
     await tester.ensureVisible(find.text('Listo'));
     await tester.tap(find.text('Listo'));
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     tablero = tester.widget<Chessboard>(find.byType(Chessboard));
     expect(tablero.controller.game.playerSide, PlayerSide.black);
     expect(tablero.orientation, Side.white);
+    expect(find.byKey(const ValueKey('velo-reto-local')), findsNothing);
+    expect(find.byKey(const ValueKey('punto-espera-0')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -171,12 +211,12 @@ void main() {
     );
     await tester.ensureVisible(find.text('Rechazar'));
     await tester.tap(find.text('Rechazar'));
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     expect(find.text('Tomar shot'), findsOneWidget);
     expect(partida.puedeMover, isFalse);
     await tester.ensureVisible(find.text('Continuar'));
     await tester.tap(find.text('Continuar'));
-    await tester.pumpAndSettle();
+    await avanzarInterfaz(tester);
     expect(partida.puedeMover, isTrue);
   });
 
@@ -207,7 +247,7 @@ void main() {
           home: PartidaLocalScreen(partida: partida),
         ),
       );
-      await tester.pumpAndSettle();
+      await avanzarInterfaz(tester);
       expect(find.byType(TableroInteractivo), findsOneWidget);
       final centro = tester.getCenter(find.byType(TableroInteractivo));
       expect(centro.dx, closeTo(size.width / 2, 1));

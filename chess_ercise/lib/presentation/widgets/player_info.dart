@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 
 // Datos provisionales: el perfil real podrá pasar nombre e imagen después.
 class PlayerInfo extends StatelessWidget {
-  const PlayerInfo({super.key, this.nombre = 'Tu nombre', this.imagen});
+  const PlayerInfo({
+    super.key,
+    this.nombre = 'Tu nombre',
+    this.imagen,
+    this.estiloNombre,
+  });
 
   final String nombre;
   final ImageProvider? imagen;
+  final TextStyle? estiloNombre;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -21,7 +27,7 @@ class PlayerInfo extends StatelessWidget {
           nombre,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.titleSmall,
+          style: estiloNombre ?? Theme.of(context).textTheme.titleSmall,
         ),
       ),
     ],
